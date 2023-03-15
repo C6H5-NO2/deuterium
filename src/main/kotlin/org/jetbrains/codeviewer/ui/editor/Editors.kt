@@ -18,6 +18,14 @@ class Editors {
         editor.close = {
             close(editor)
         }
+        // only one editor
+        if (editors.isNotEmpty()) {
+            editors.forEach { e ->
+                val close = e.close
+                if (close != null)
+                    close()
+            }
+        }
         editors.add(editor)
         editor.activate()
     }

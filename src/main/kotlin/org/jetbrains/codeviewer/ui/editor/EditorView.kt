@@ -1,7 +1,15 @@
 package org.jetbrains.codeviewer.ui.editor
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.selection.DisableSelection
@@ -23,6 +31,8 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
+import com.c6h5no2.deuterium.ui.horizontalSplitLayout
+import com.c6h5no2.deuterium.view.runPanel
 import org.jetbrains.codeviewer.platform.VerticalScrollbar
 import org.jetbrains.codeviewer.ui.common.AppTheme
 import org.jetbrains.codeviewer.ui.common.Fonts
@@ -33,7 +43,7 @@ import kotlin.text.Regex.Companion.fromLiteral
 
 @Composable
 fun EditorView(model: Editor, settings: Settings) = key(model) {
-    with (LocalDensity.current) {
+    with(LocalDensity.current) {
         SelectionContainer {
             Surface(
                 Modifier.fillMaxSize(),
