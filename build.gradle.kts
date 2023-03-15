@@ -12,6 +12,7 @@ repositories {
 }
 
 dependencies {
+    implementation(compose.materialIconsExtended)
     implementation(compose.desktop.currentOs)
 }
 
