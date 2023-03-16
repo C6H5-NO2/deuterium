@@ -16,16 +16,12 @@
 
 package com.c6h5no2.deuterium.ui.editor
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.selection.DisableSelection
@@ -47,14 +43,12 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
-import com.c6h5no2.deuterium.ui.horizontalSplitLayout
-import com.c6h5no2.deuterium.view.runPanel
-import org.jetbrains.codeviewer.platform.VerticalScrollbar
-import org.jetbrains.codeviewer.ui.common.AppTheme
-import org.jetbrains.codeviewer.ui.common.Fonts
-import org.jetbrains.codeviewer.ui.common.Settings
-import org.jetbrains.codeviewer.util.loadableScoped
-import org.jetbrains.codeviewer.util.withoutWidthConstraints
+import com.c6h5no2.deuterium.platform.VerticalScrollbar
+import com.c6h5no2.deuterium.ui.common.AppTheme
+import com.c6h5no2.deuterium.ui.common.Fonts
+import com.c6h5no2.deuterium.ui.common.Settings
+import com.c6h5no2.deuterium.util.loadableScoped
+import com.c6h5no2.deuterium.util.withoutWidthConstraints
 import kotlin.text.Regex.Companion.fromLiteral
 
 @Composable
@@ -70,15 +64,13 @@ fun EditorView(model: Editor, settings: Settings) = key(model) {
                 if (lines != null) {
                     Box {
                         Lines(lines!!, settings)
-                        Box(
-                            Modifier
-                                .offset(
-                                    x = settings.fontSize.toDp() * 0.5f * settings.maxLineSymbols
-                                )
-                                .width(1.dp)
-                                .fillMaxHeight()
-                                .background(AppTheme.colors.backgroundLight)
-                        )
+                        // Box(
+                        //     Modifier
+                        //         .offset(x = settings.fontSize.toDp() * 0.5f * settings.maxLineSymbols)
+                        //         .width(1.dp)
+                        //         .fillMaxHeight()
+                        //         .background(AppTheme.colors.backgroundLight)
+                        // )
                     }
                 } else {
                     CircularProgressIndicator(

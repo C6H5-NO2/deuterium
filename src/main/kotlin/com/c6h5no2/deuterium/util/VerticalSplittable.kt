@@ -34,8 +34,8 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import org.jetbrains.codeviewer.platform.cursorForHorizontalResize
-import org.jetbrains.codeviewer.ui.common.AppTheme
+import com.c6h5no2.deuterium.platform.cursorForHorizontalResize
+import com.c6h5no2.deuterium.ui.common.AppTheme
 
 @Composable
 fun VerticalSplittable(

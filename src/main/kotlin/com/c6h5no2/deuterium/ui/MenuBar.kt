@@ -1,4 +1,4 @@
-package com.c6h5no2.deuterium.view
+package com.c6h5no2.deuterium.ui
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
@@ -7,7 +7,6 @@ import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyShortcut
 import androidx.compose.ui.window.FrameWindowScope
 import androidx.compose.ui.window.MenuBar
-import com.c6h5no2.deuterium.model.MainModel
 import kotlinx.coroutines.launch
 
 
@@ -44,7 +43,7 @@ fun FrameWindowScope.menuBar(mainModel: MainModel) = MenuBar {
         Item("Edit Configuration") {}
     }
 
-    Menu("Help", mnemonic = 'H') {
-        Item("About") {}
-    }
+    // Menu("Help", mnemonic = 'H') {
+    //     Item("About") {}
+    // }
 }

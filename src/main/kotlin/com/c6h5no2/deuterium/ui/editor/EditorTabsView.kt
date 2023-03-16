@@ -37,7 +37,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import org.jetbrains.codeviewer.ui.common.AppTheme
+import com.c6h5no2.deuterium.ui.common.AppTheme
 
 @Composable
 fun EditorTabsView(model: Editors) = Row(Modifier.horizontalScroll(rememberScrollState())) {

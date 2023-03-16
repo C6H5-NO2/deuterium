@@ -14,20 +14,25 @@
    limitations under the License.
 */
 
-package com.c6h5no2.deuterium.platform
+package com.c6h5no2.deuterium.util
 
-import kotlinx.coroutines.CoroutineScope
-import com.c6h5no2.deuterium.util.TextLines
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import kotlinx.coroutines.CompletableDeferred
 
-val HomeFolder: JbFile get() = java.io.File(System.getProperty("user.home")).toProjectFile()
 
-interface JbFile {
-    val jvmFile: java.io.File
+class DialogState<T> {
+    private var onResult: CompletableDeferred<T>? by mutableStateOf(null)
 
-    val name: String
-    val isDirectory: Boolean
-    val children: List<JbFile>
-    val hasChildren: Boolean
+    val isAwaiting get() = onResult != null
 
-    fun readLines(scope: CoroutineScope): TextLines
-}
+    suspend fun awaitResult(): T {
+        onResult = CompletableDeferred()
+        val result = onResult!!.await()
+        onResult = null
+        return result
+    }
+
+    fun onResult(result: T) = onResult!!.complete(result)
+} 

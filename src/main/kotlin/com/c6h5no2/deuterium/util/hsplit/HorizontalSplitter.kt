@@ -1,4 +1,4 @@
-package com.c6h5no2.deuterium.ui
+package com.c6h5no2.deuterium.util.hsplit
 
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.draggable
@@ -19,14 +19,14 @@ import androidx.compose.ui.unit.dp
 import java.awt.Cursor
 
 
-internal class SplitterState {
+class SplitterState {
     var isResizing by mutableStateOf(false)
     var isResizeEnabled by mutableStateOf(false)
 }
 
 
 @Composable
-internal fun horizontalSplitter(
+fun horizontalSplitter(
     splitterState: SplitterState,
     onResize: (delta: Dp) -> Unit
 ) = Box {

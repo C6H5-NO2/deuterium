@@ -20,7 +20,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
-import org.jetbrains.codeviewer.platform.font
+import com.c6h5no2.deuterium.platform.font
 
 object Fonts {
     @Composable

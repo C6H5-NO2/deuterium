@@ -23,7 +23,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import org.jetbrains.codeviewer.util.TextLines
+import com.c6h5no2.deuterium.util.TextLines
 import java.io.FileInputStream
 import java.io.FilenameFilter
 import java.io.IOException
@@ -31,14 +31,14 @@ import java.io.RandomAccessFile
 import java.nio.channels.FileChannel
 import java.nio.charset.StandardCharsets
 
-fun java.io.File.toProjectFile(): File = object : File {
+fun java.io.File.toProjectFile(): JbFile = object : JbFile {
     override val jvmFile get() = this@toProjectFile
 
     override val name: String get() = this@toProjectFile.name
 
     override val isDirectory: Boolean get() = this@toProjectFile.isDirectory
 
-    override val children: List<File>
+    override val children: List<JbFile>
         get() = this@toProjectFile
             .listFiles(FilenameFilter { _, name -> !name.startsWith(".") })
             .orEmpty()

@@ -23,12 +23,14 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.Icon
 import androidx.compose.material.LocalContentColor
+import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowForward
@@ -41,20 +43,22 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
-import com.c6h5no2.deuterium.ui.horizontalSplitLayout
-import com.c6h5no2.deuterium.view.runPanel
-import org.jetbrains.codeviewer.ui.editor.EditorEmptyView
-import org.jetbrains.codeviewer.ui.editor.EditorTabsView
-import org.jetbrains.codeviewer.ui.editor.EditorView
-import org.jetbrains.codeviewer.ui.filetree.FileTreeView
-import org.jetbrains.codeviewer.ui.filetree.FileTreeViewTabView
-import org.jetbrains.codeviewer.ui.statusbar.StatusBar
-import org.jetbrains.codeviewer.util.SplitterState
-import org.jetbrains.codeviewer.util.VerticalSplittable
+import com.c6h5no2.deuterium.ui.editor.EditorEmptyView
+import com.c6h5no2.deuterium.ui.editor.EditorView
+import com.c6h5no2.deuterium.ui.filetree.FileTreeView
+import com.c6h5no2.deuterium.ui.filetree.FileTreeViewTabView
+import com.c6h5no2.deuterium.ui.runner.RunnerModel
+import com.c6h5no2.deuterium.ui.runner.runnerView
+import com.c6h5no2.deuterium.util.SplitterState
+import com.c6h5no2.deuterium.util.VerticalSplittable
+import com.c6h5no2.deuterium.util.hsplit.LowerLayoutState
+import com.c6h5no2.deuterium.util.hsplit.horizontalSplitLayout
 
 @Composable
-fun CodeViewerView(model: CodeViewer) {
+fun CodeViewerView(codeViewer: CodeViewer, runner: RunnerModel) {
     val panelState = remember { PanelState() }
+    val lowerLayoutState = remember { LowerLayoutState() }
+    runner.expandPanel = { lowerLayoutState.toggleExpand(true) }
 
     val animatedSize = if (panelState.splitter.isResizing) {
         panelState.actualSize()
@@ -76,29 +80,39 @@ fun CodeViewerView(model: CodeViewer) {
         ResizablePanel(Modifier.width(animatedSize).fillMaxHeight(), panelState) {
             Column {
                 FileTreeViewTabView()
-                FileTreeView(model.fileTree)
+                FileTreeView(codeViewer.fileTree)
             }
         }
 
         Box {
-            if (model.editors.active != null) {
+            if (codeViewer.editors.active != null) {
                 horizontalSplitLayout(
+                    lowerLayoutState,
                     Modifier.fillMaxSize(),
                     upperContent = {
                         Box {
                             Column(Modifier.align(Alignment.Center)) {
                                 // EditorTabsView(model.editors)
-                                EditorView(model.editors.active!!, model.settings)
+                                EditorView(codeViewer.editors.active!!, codeViewer.settings)
                             }
                         }
                     },
                     lowerContent = {
                         Box {
                             Column(Modifier.align(Alignment.Center)) {
-                                runPanel()
-                                StatusBar(model.settings)
+                                runnerView(runner)
+                                // StatusBar(codeViewer.settings)
                             }
                         }
+                    },
+                    lowerContentTitleBar = {
+                        Text(
+                            text = if (runner.isRunning) "> Running" else "Run",
+                            modifier = Modifier
+                                .padding(6.dp)
+                                .align(Alignment.TopStart)
+                                .clickable { lowerLayoutState.toggleExpand() }
+                        )
                     }
                 )
             } else {

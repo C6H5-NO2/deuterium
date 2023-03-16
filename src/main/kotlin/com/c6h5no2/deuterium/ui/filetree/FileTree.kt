@@ -19,11 +19,11 @@ package com.c6h5no2.deuterium.ui.filetree
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import org.jetbrains.codeviewer.platform.File
-import org.jetbrains.codeviewer.ui.editor.Editors
+import com.c6h5no2.deuterium.platform.JbFile
+import com.c6h5no2.deuterium.ui.editor.Editors
 
 class ExpandableFile(
-    val file: File,
+    val file: JbFile,
     val level: Int,
 ) {
     var children: List<ExpandableFile> by mutableStateOf(emptyList())
@@ -41,7 +41,7 @@ class ExpandableFile(
     }
 }
 
-class FileTree(root: File, private val editors: Editors) {
+class FileTree(root: JbFile, private val opener: (JbFile) -> Unit) {
     private val expandableRoot = ExpandableFile(root, 0).apply {
         toggleExpanded()
     }
@@ -64,7 +64,7 @@ class FileTree(root: File, private val editors: Editors) {
 
         fun open() = when (type) {
             is ItemType.Folder -> file.toggleExpanded()
-            is ItemType.File -> editors.open(file.file)
+            is ItemType.File -> opener(file.file)
         }
     }
 

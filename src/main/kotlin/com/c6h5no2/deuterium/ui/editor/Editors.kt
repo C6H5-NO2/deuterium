@@ -17,8 +17,8 @@
 package com.c6h5no2.deuterium.ui.editor
 
 import androidx.compose.runtime.mutableStateListOf
-import org.jetbrains.codeviewer.platform.File
-import org.jetbrains.codeviewer.util.SingleSelection
+import com.c6h5no2.deuterium.platform.JbFile
+import com.c6h5no2.deuterium.util.SingleSelection
 
 class Editors {
     private val selection = SingleSelection()
@@ -28,12 +28,10 @@ class Editors {
 
     val active: Editor? get() = selection.selected as Editor?
 
-    fun open(file: File) {
+    fun open(file: JbFile) {
         val editor = Editor(file)
         editor.selection = selection
-        editor.close = {
-            close(editor)
-        }
+        editor.close = { close(editor) }
         // only one editor
         if (editors.isNotEmpty())
             editors.forEach { it.close?.invoke() }
