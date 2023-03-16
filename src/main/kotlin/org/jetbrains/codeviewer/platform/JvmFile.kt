@@ -3,7 +3,10 @@ package org.jetbrains.codeviewer.platform
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import org.jetbrains.codeviewer.util.TextLines
 import java.io.FileInputStream
 import java.io.FilenameFilter
@@ -13,18 +16,20 @@ import java.nio.channels.FileChannel
 import java.nio.charset.StandardCharsets
 
 fun java.io.File.toProjectFile(): File = object : File {
+    override val jvmFile get() = this@toProjectFile
+
     override val name: String get() = this@toProjectFile.name
 
     override val isDirectory: Boolean get() = this@toProjectFile.isDirectory
 
     override val children: List<File>
         get() = this@toProjectFile
-            .listFiles(FilenameFilter { _, name -> !name.startsWith(".")})
+            .listFiles(FilenameFilter { _, name -> !name.startsWith(".") })
             .orEmpty()
             .map { it.toProjectFile() }
 
     override val hasChildren: Boolean
-        get() = isDirectory && listFiles()?.size ?: 0 > 0
+        get() = isDirectory && (listFiles()?.size ?: 0) > 0
 
 
     override fun readLines(scope: CoroutineScope): TextLines {

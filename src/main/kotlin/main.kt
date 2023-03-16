@@ -16,6 +16,6 @@ fun main() = singleWindowApplication(
     icon = BitmapPainter(useResource("ic_launcher.png", ::loadImageBitmap)),
 ) {
     val mainModel = remember { MainModel() }
-    menuBar(mainModel)
     MainView(mainModel)
+    menuBar(mainModel)
 }

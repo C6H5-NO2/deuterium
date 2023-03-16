@@ -7,12 +7,16 @@ import org.jetbrains.codeviewer.platform.File
 import org.jetbrains.codeviewer.util.EmptyTextLines
 import org.jetbrains.codeviewer.util.SingleSelection
 
+
 class Editor(
-    val fileName: String,
+    val file: File,
     val lines: (backgroundScope: CoroutineScope) -> Lines,
 ) {
     var close: (() -> Unit)? = null
     lateinit var selection: SingleSelection
+
+    val fileName: String
+        get() = file.name
 
     val isActive: Boolean
         get() = selection.selected === this
@@ -33,7 +37,7 @@ class Editor(
 }
 
 fun Editor(file: File) = Editor(
-    fileName = file.name
+    file = file
 ) { backgroundScope ->
     val textLines = try {
         file.readLines(backgroundScope)
@@ -41,7 +45,7 @@ fun Editor(file: File) = Editor(
         e.printStackTrace()
         EmptyTextLines
     }
-    val isCode = file.name.endsWith(".kt", ignoreCase = true)
+    val isCode = file.name.endsWith(".kts", ignoreCase = true)
 
     fun content(index: Int): Editor.Content {
         val text = textLines.get(index)

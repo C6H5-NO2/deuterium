@@ -24,6 +24,8 @@ fun MainView(mainModel: MainModel) {
         )
     }
 
+    mainModel.getCurrentFile = { codeViewer.editors.active?.file?.jvmFile }
+
     DisableSelection {
         MaterialTheme(
             colors = AppTheme.colors.material

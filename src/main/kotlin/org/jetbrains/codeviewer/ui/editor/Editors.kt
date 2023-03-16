@@ -19,18 +19,15 @@ class Editors {
             close(editor)
         }
         // only one editor
-        if (editors.isNotEmpty()) {
-            editors.forEach { e ->
-                val close = e.close
-                if (close != null)
-                    close()
-            }
-        }
+        if (editors.isNotEmpty())
+            editors.forEach { it.close?.invoke() }
         editors.add(editor)
         editor.activate()
+        assert(editors.size == 1)
     }
 
     private fun close(editor: Editor) {
+        // todo: close file
         val index = editors.indexOf(editor)
         editors.remove(editor)
         if (editor.isActive) {

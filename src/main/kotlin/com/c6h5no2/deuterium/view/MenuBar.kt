@@ -16,24 +16,26 @@ import kotlinx.coroutines.launch
 fun FrameWindowScope.menuBar(mainModel: MainModel) = MenuBar {
     val scope = rememberCoroutineScope()
 
-    fun new() = scope.launch { println("todo: new") }
-    fun open() = scope.launch { mainModel.openFile() }
-    fun save() = scope.launch { println("todo: save") }
-    fun exit() = scope.launch { println("todo: exit") }
+    fun newFile() = scope.launch { println("todo: new") }
+    fun openFile() = scope.launch { mainModel.openFile() }
+    fun saveFile() = scope.launch { println("todo: save") }
+    fun exitApp() = scope.launch { println("todo: exit") }
 
     Menu("File", mnemonic = 'F') {
-        Item("New", shortcut = KeyShortcut(Key.N, ctrl = true)) { new() }
-        Item("Open", shortcut = KeyShortcut(Key.O, ctrl = true)) { open() }
+        Item("New", shortcut = KeyShortcut(Key.N, ctrl = true)) { newFile() }
+        Item("Open", shortcut = KeyShortcut(Key.O, ctrl = true)) { openFile() }
         Separator()
-        Item("Save", enabled = true, shortcut = KeyShortcut(Key.S, ctrl = true)) { save() }
+        Item("Save", enabled = true, shortcut = KeyShortcut(Key.S, ctrl = true)) { saveFile() }
         Separator()
         Item("Settings", shortcut = KeyShortcut(Key.Comma, ctrl = true)) { }
         Separator()
-        Item("Exit") { exit() }
+        Item("Exit") { exitApp() }
     }
 
+    fun runOnce() = scope.launch { mainModel.runOnce() }
+
     Menu("Run", mnemonic = 'R') {
-        Item("Run Once", enabled = true) {}
+        Item("Run Once", enabled = true) { runOnce() }
         // Item("Run Multiple", enabled = true) {}
         // Separator()
         // Item("Stop", enabled = true) {}
