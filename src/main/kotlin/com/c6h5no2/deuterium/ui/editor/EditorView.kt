@@ -17,6 +17,7 @@
 package com.c6h5no2.deuterium.ui.editor
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -59,7 +60,11 @@ import com.c6h5no2.deuterium.ui.common.AppTheme
 import com.c6h5no2.deuterium.ui.common.Fonts
 import com.c6h5no2.deuterium.ui.common.Settings
 import com.c6h5no2.deuterium.util.loadableScoped
+import kotlin.math.absoluteValue
 import kotlin.text.Regex.Companion.fromLiteral
+
+
+private val logger = mu.KotlinLogging.logger {}
 
 @Composable
 fun EditorView(model: Editor, settings: Settings) = key(model) {
@@ -95,25 +100,35 @@ fun EditorView(model: Editor, settings: Settings) = key(model) {
 }
 
 @Composable
-private fun Lines(lines: Editor.Lines, model: Editor, settings: Settings) = with(LocalDensity.current) {
+private fun Lines(lines: Editor.Lines, editor: Editor, settings: Settings) = with(LocalDensity.current) {
     val maxNum = remember(lines.lineNumberDigitCount) {
         (1..lines.lineNumberDigitCount).joinToString(separator = "") { "9" }
     }
 
     Box(Modifier.fillMaxSize()) {
-        val scrollState = rememberLazyListState()
+        val listScrollState = rememberLazyListState()
         val editorScrollState = rememberScrollState()
-        LaunchedEffect(scrollState.firstVisibleItemIndex, scrollState.firstVisibleItemScrollOffset) {
-            val ele = scrollState.layoutInfo.visibleItemsInfo.getOrNull(0) ?: return@LaunchedEffect
+
+        LaunchedEffect(listScrollState.firstVisibleItemIndex, listScrollState.firstVisibleItemScrollOffset) {
+            val ele = listScrollState.layoutInfo.visibleItemsInfo.getOrNull(0) ?: return@LaunchedEffect
             val compensation = 4
             val offset = ele.index * ele.size - ele.offset + compensation
             editorScrollState.scrollTo(offset)
         }
 
+        LaunchedEffect(editorScrollState.value) {
+            val ele = listScrollState.layoutInfo.visibleItemsInfo.getOrNull(0) ?: return@LaunchedEffect
+            val compensation = 4
+            val offset = ele.index * ele.size - ele.offset + compensation
+            val sby = (editorScrollState.value - offset).toFloat()
+            if (sby.absoluteValue > 2 * compensation)
+                listScrollState.scrollBy(sby)
+        }
+
         Row(Modifier.fillMaxSize()) {
             LazyColumn(
                 modifier = Modifier.fillMaxHeight(),
-                state = scrollState
+                state = listScrollState
             ) {
                 items(lines.size) { index ->
                     Box(Modifier.height(settings.fontSize.toDp() * 1.6f)) {
@@ -123,7 +138,7 @@ private fun Lines(lines: Editor.Lines, model: Editor, settings: Settings) = with
             }
 
             codeContent(
-                model,
+                editor,
                 Modifier
                     .fillMaxSize()
                     .padding(start = 28.dp, end = 12.dp)
@@ -135,7 +150,7 @@ private fun Lines(lines: Editor.Lines, model: Editor, settings: Settings) = with
 
         VerticalScrollbar(
             Modifier.align(Alignment.CenterEnd),
-            scrollState
+            listScrollState
         )
     }
 }
@@ -190,7 +205,7 @@ private fun LineContent(content: Editor.Content, modifier: Modifier, settings: S
 )
 
 @Composable
-fun codeContent(model: Editor, modifier: Modifier, settings: Settings) {
+fun codeContent(editor: Editor, modifier: Modifier, settings: Settings) {
     val value = remember { mutableStateOf((1..100).joinToString("") { "$it\n" }) }  // todo
     val colors = TextFieldDefaults.textFieldColors()
     BasicTextField(
