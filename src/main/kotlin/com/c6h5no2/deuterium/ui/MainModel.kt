@@ -57,9 +57,6 @@ class MainModel {
         // todo: check save state
         val file = currentFile
         file ?: return
-        // todo: check run state
-        // todo: pop panel
-        
         runner.runOnce(file)
     }
 

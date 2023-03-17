@@ -32,7 +32,7 @@ private val logger = mu.KotlinLogging.logger {}
 
 @Composable
 fun runnerView(runner: RunnerModel) {
-    Box {
+    Box(Modifier.fillMaxSize(if (runner.updateFlip) 1f else .999f)) {
         Column(Modifier.align(Alignment.Center)) {
             SelectionContainer {
                 Box {
@@ -55,7 +55,7 @@ private fun runPanelLines(runner: RunnerModel) = with(LocalDensity.current) {
                 state = scrollState
             ) {
                 items(runner.runnerOutputs.size) { index ->
-                    Box(Modifier.height(17.toDp() * 1.6f)) {
+                    Box(Modifier.height(17.sp.toDp() * 1.6f)) {
                         runPanelLine(
                             Modifier.align(Alignment.CenterStart),
                             runner.runnerOutputs.getTyped(index),

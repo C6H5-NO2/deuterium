@@ -34,7 +34,10 @@ fun FrameWindowScope.menuBar(mainModel: MainModel) = MenuBar {
     fun runOnce() = scope.launch { mainModel.runOnce() }
 
     Menu("Run", mnemonic = 'R') {
-        Item("Run Once", enabled = true) { runOnce() }
+        Item(
+            "Run Once",
+            enabled = mainModel.editorState == MainModel.EditorState.LOADED && !mainModel.runner.isRunning
+        ) { runOnce() }
         // Item("Run Multiple", enabled = true) {}
         // Separator()
         // Item("Stop", enabled = true) {}

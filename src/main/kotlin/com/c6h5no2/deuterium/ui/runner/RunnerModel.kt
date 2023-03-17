@@ -4,12 +4,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
-import java.io.BufferedReader
 import java.io.File
 import java.io.IOException
-import java.io.InputStreamReader
+import java.io.InputStream
+import kotlin.concurrent.thread
 
 
 private val logger = mu.KotlinLogging.logger {}
@@ -24,6 +23,10 @@ class RunnerModel {
         private set
 
     var runnerOutputs: RunnerOutputs = RunnerOutputs()
+        private set
+
+    // no need to lock, the value is irrelevant
+    var updateFlip by mutableStateOf(false)
         private set
 
     suspend fun runOnce(file: File) {
@@ -55,38 +58,45 @@ class RunnerModel {
             try {
                 val process = pb.start()
                 process.outputStream.close()
-                val outputReader = BufferedReader(InputStreamReader(process.inputStream))
-                val errorReader = BufferedReader(InputStreamReader(process.errorStream))
 
-                val outputBuffer = CharArray(1024)
-                val errorBuffer = CharArray(1024)
+                thread {
+                    readFromStream(process.inputStream, RunnerOutputType.OUTPUT_STREAM)
+                }
 
-                while (true) {
-                    val numCharOutput = outputReader.read(outputBuffer, 0, outputBuffer.size)
-                    if (numCharOutput > 0) {
-                        val text = String(outputBuffer, 0, numCharOutput)
-                        runnerOutputs.appendSegment(text, RunnerOutputType.OUTPUT_STREAM)
-                    }
+                thread {
+                    readFromStream(process.errorStream, RunnerOutputType.ERROR_STREAM)
+                }
 
-                    val numCharError = errorReader.read(errorBuffer, 0, errorBuffer.size)
-                    if (numCharError > 0) {
-                        val text = String(errorBuffer, 0, numCharError)
-                        runnerOutputs.appendSegment(text, RunnerOutputType.ERROR_STREAM)
-                    }
-
-                    delay(100)
-                    if (!process.isAlive)
-                        break
+                while (process.isAlive) {
+                    Thread.sleep(100)
+                    updateFlip = !updateFlip
                 }
 
                 val exitCode = process.waitFor()
                 val msg = "Process finished with ${if (exitCode == 0) "" else "non-zero "}exit code $exitCode"
+                logger.info { msg }
                 runnerOutputs.appendSegment("\n\n$msg\n\n", RunnerOutputType.PROCESS_INFO)
             } catch (e: IOException) {
-                runnerOutputs.appendSegment("\n\nProcess failed with $e\n\n", RunnerOutputType.PROCESS_FATAL)
+                val msg = "Process failed with $e"
+                logger.info { msg }
+                runnerOutputs.appendSegment("\n\n$msg\n\n", RunnerOutputType.PROCESS_FATAL)
             } finally {
                 isRunning = false
             }
+        }
+    }
+
+
+    private fun readFromStream(istream: InputStream, type: RunnerOutputType) {
+        val buffer = CharArray(1024)
+        var bytesRead: Int
+        while (true) {
+            bytesRead = istream.reader().read(buffer)
+            logger.info { "Read $bytesRead bytes with $updateFlip" }
+            updateFlip = !updateFlip
+            if (bytesRead == -1)
+                break
+            runnerOutputs.appendSegment(String(buffer, 0, bytesRead), type)
         }
     }
 }
