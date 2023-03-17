@@ -80,6 +80,7 @@ private fun runPanelLine(modifier: Modifier, segs: List<RunnerOutputSeg>, filena
         val text = styledString(segs, filename)
         val textModifier = Modifier.withoutWidthConstraints().padding(start = 6.dp, end = 12.dp)
         // bug of Compose: ClickableText does not work inside a SelectionContainer
+        // https://github.com/JetBrains/compose-multiplatform/issues/1450
         // https://issuetracker.google.com/issues/184950231
         DisableSelection {
             ClickableText(

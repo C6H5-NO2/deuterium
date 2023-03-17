@@ -126,7 +126,7 @@ private class PanelState {
     var expandedSize by mutableStateOf(300.dp)
     val expandedSizeMin = 90.dp
     val expandedSizeMax = 700.dp
-    var isExpanded by mutableStateOf(true)
+    var isExpanded by mutableStateOf(false)
     val splitter = SplitterState()
 
     fun actualSize() = if (isExpanded) expandedSize else collapsedSize

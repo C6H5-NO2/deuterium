@@ -33,10 +33,12 @@ fun main() = application {
         }
     }
 
+    val windowState = remember { WindowState(WindowPlacement.Maximized) }
+
     Window(
         onCloseRequest = this::exitApplication,
         title = mainModel.getTitle(),
-        state = WindowState(WindowPlacement.Maximized),
+        state = windowState,
         icon = BitmapPainter(useResource("ic_launcher.png", ::loadImageBitmap)),
     ) {
         MainView(mainModel)

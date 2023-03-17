@@ -69,7 +69,7 @@ fun VerticalSplittable(
 
 class SplitterState {
     var isResizing by mutableStateOf(false)
-    var isResizeEnabled by mutableStateOf(true)
+    var isResizeEnabled by mutableStateOf(false)
 }
 
 @Composable

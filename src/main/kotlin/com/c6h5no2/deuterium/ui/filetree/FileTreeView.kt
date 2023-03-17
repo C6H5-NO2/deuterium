@@ -52,7 +52,7 @@ fun FileTreeViewTabView() = Surface {
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
-            "Files",
+            "Explorer",
             color = LocalContentColor.current.copy(alpha = 0.60f),
             fontSize = 12.sp,
             modifier = Modifier.padding(horizontal = 4.dp)

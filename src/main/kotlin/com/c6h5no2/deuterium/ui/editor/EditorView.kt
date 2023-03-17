@@ -16,30 +16,41 @@
 
 package com.c6h5no2.deuterium.ui.editor
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.selection.DisableSelection
 import androidx.compose.foundation.text.selection.SelectionContainer
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.LocalContentColor
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
+import androidx.compose.material.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
@@ -48,7 +59,6 @@ import com.c6h5no2.deuterium.ui.common.AppTheme
 import com.c6h5no2.deuterium.ui.common.Fonts
 import com.c6h5no2.deuterium.ui.common.Settings
 import com.c6h5no2.deuterium.util.loadableScoped
-import com.c6h5no2.deuterium.util.withoutWidthConstraints
 import kotlin.text.Regex.Companion.fromLiteral
 
 @Composable
@@ -63,7 +73,7 @@ fun EditorView(model: Editor, settings: Settings) = key(model) {
 
                 if (lines != null) {
                     Box {
-                        Lines(lines!!, settings)
+                        Lines(lines!!, model, settings)
                         // Box(
                         //     Modifier
                         //         .offset(x = settings.fontSize.toDp() * 0.5f * settings.maxLineSymbols)
@@ -85,23 +95,42 @@ fun EditorView(model: Editor, settings: Settings) = key(model) {
 }
 
 @Composable
-private fun Lines(lines: Editor.Lines, settings: Settings) = with(LocalDensity.current) {
+private fun Lines(lines: Editor.Lines, model: Editor, settings: Settings) = with(LocalDensity.current) {
     val maxNum = remember(lines.lineNumberDigitCount) {
         (1..lines.lineNumberDigitCount).joinToString(separator = "") { "9" }
     }
 
     Box(Modifier.fillMaxSize()) {
         val scrollState = rememberLazyListState()
+        val editorScrollState = rememberScrollState()
+        LaunchedEffect(scrollState.firstVisibleItemIndex, scrollState.firstVisibleItemScrollOffset) {
+            val ele = scrollState.layoutInfo.visibleItemsInfo.getOrNull(0) ?: return@LaunchedEffect
+            val compensation = 4
+            val offset = ele.index * ele.size - ele.offset + compensation
+            editorScrollState.scrollTo(offset)
+        }
 
-        LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            state = scrollState
-        ) {
-            items(lines.size) { index ->
-                Box(Modifier.height(settings.fontSize.toDp() * 1.6f)) {
-                    Line(Modifier.align(Alignment.CenterStart), maxNum, lines[index], settings)
+        Row(Modifier.fillMaxSize()) {
+            LazyColumn(
+                modifier = Modifier.fillMaxHeight(),
+                state = scrollState
+            ) {
+                items(lines.size) { index ->
+                    Box(Modifier.height(settings.fontSize.toDp() * 1.6f)) {
+                        Line(Modifier.align(Alignment.CenterStart), maxNum, lines[index], settings)
+                    }
                 }
             }
+
+            codeContent(
+                model,
+                Modifier
+                    .fillMaxSize()
+                    .padding(start = 28.dp, end = 12.dp)
+                    .horizontalScroll(rememberScrollState())
+                    .verticalScroll(editorScrollState),
+                settings
+            )
         }
 
         VerticalScrollbar(
@@ -123,14 +152,14 @@ private fun Line(modifier: Modifier, maxNum: String, line: Editor.Line, settings
                 LineNumber(line.number.toString(), Modifier.align(Alignment.CenterEnd), settings)
             }
         }
-        LineContent(
-            line.content,
-            modifier = Modifier
-                .weight(1f)
-                .withoutWidthConstraints()
-                .padding(start = 28.dp, end = 12.dp),
-            settings = settings
-        )
+        // LineContent(
+        //     line.content,
+        //     modifier = Modifier
+        //         .weight(1f)
+        //         .withoutWidthConstraints()
+        //         .padding(start = 28.dp, end = 12.dp),
+        //     settings = settings
+        // )
     }
 }
 
@@ -159,6 +188,27 @@ private fun LineContent(content: Editor.Content, modifier: Modifier, settings: S
     modifier = modifier,
     softWrap = false
 )
+
+@Composable
+fun codeContent(model: Editor, modifier: Modifier, settings: Settings) {
+    val value = remember { mutableStateOf((1..100).joinToString("") { "$it\n" }) }  // todo
+    val colors = TextFieldDefaults.textFieldColors()
+    BasicTextField(
+        value = value.value,
+        onValueChange = {
+            // todo
+            value.value = it
+        },
+        modifier = modifier.background(colors.backgroundColor(enabled = true).value),
+        textStyle = TextStyle(
+            color = colors.textColor(enabled = true).value,
+            fontSize = settings.fontSize,
+            fontFamily = Fonts.jetbrainsMono(),
+            lineHeight = settings.fontSize * 1.6f
+        ),
+        cursorBrush = SolidColor(colors.cursorColor(isError = false).value)
+    )
+}
 
 private fun codeString(str: String) = buildAnnotatedString {
     withStyle(AppTheme.code.simple) {

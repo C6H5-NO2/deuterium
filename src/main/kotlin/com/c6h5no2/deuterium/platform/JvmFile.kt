@@ -19,16 +19,15 @@ package com.c6h5no2.deuterium.platform
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import com.c6h5no2.deuterium.util.TextLines
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import com.c6h5no2.deuterium.util.TextLines
-import java.io.FileInputStream
 import java.io.FilenameFilter
 import java.io.IOException
 import java.io.RandomAccessFile
-import java.nio.channels.FileChannel
+import java.nio.ByteBuffer
 import java.nio.charset.StandardCharsets
 
 fun java.io.File.toProjectFile(): JbFile = object : JbFile {
@@ -52,8 +51,12 @@ fun java.io.File.toProjectFile(): JbFile = object : JbFile {
         var byteBufferSize: Int
         val byteBuffer = RandomAccessFile(this@toProjectFile, "r").use { file ->
             byteBufferSize = file.length().toInt()
-            file.channel
-                .map(FileChannel.MapMode.READ_ONLY, 0, file.length())
+            val byteBuffer = ByteBuffer.allocate(byteBufferSize)
+            // the script file is relatively small
+            file.channel.read(byteBuffer)
+            file.channel.close()
+            file.close()
+            return@use byteBuffer
         }
 
         val lineStartPositions = IntList()
@@ -70,7 +73,7 @@ fun java.io.File.toProjectFile(): JbFile = object : JbFile {
         }
 
         scope.launch(Dispatchers.IO) {
-            readLinePositions(lineStartPositions)
+            readLinePositions(lineStartPositions, byteBuffer)
             refreshJob.cancel()
             size = lineStartPositions.size
         }
@@ -93,9 +96,11 @@ fun java.io.File.toProjectFile(): JbFile = object : JbFile {
 }
 
 private fun java.io.File.readLinePositions(
-    starts: IntList
+    starts: IntList,
+    buffer: ByteBuffer
 ) {
-    require(length() <= Int.MAX_VALUE) {
+    val length = length()
+    require(length <= Int.MAX_VALUE) {
         "Files with size over ${Int.MAX_VALUE} aren't supported"
     }
 
@@ -103,22 +108,12 @@ private fun java.io.File.readLinePositions(
     starts.clear(length().toInt() / averageLineLength)
 
     try {
-        FileInputStream(this@readLinePositions).use {
-            val channel = it.channel
-            val ib = channel.map(
-                FileChannel.MapMode.READ_ONLY, 0, channel.size()
-            )
-            var isBeginOfLine = true
-            var position = 0L
-            while (ib.hasRemaining()) {
-                val byte = ib.get()
-                if (isBeginOfLine) {
-                    starts.add(position.toInt())
-                }
-                isBeginOfLine = byte.toInt().toChar() == '\n'
-                position++
-            }
-            channel.close()
+        starts.add(0)
+        var position = 0
+        while (position < length) {
+            if (buffer[position].toInt().toChar() == '\n')
+                starts.add(position + 1)
+            position++
         }
     } catch (e: IOException) {
         e.printStackTrace()
