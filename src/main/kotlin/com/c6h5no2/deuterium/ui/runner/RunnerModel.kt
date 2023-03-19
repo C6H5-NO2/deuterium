@@ -78,7 +78,7 @@ class RunnerModel {
                 runnerOutputs.appendSegment("\n\n$msg\n\n", RunnerOutputType.PROCESS_INFO)
             } catch (e: IOException) {
                 val msg = "Process failed with $e"
-                logger.info { msg }
+                logger.error { msg }
                 runnerOutputs.appendSegment("\n\n$msg\n\n", RunnerOutputType.PROCESS_FATAL)
             } finally {
                 updateFlip = !updateFlip

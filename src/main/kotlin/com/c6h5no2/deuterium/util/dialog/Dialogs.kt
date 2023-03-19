@@ -14,7 +14,7 @@
    limitations under the License.
 */
 
-package com.c6h5no2.deuterium.util
+package com.c6h5no2.deuterium.util.dialog
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -38,7 +38,7 @@ fun FrameWindowScope.FileDialog(
     onResult: (result: Path?) -> Unit
 ) = AwtWindow(
     create = {
-        object : FileDialog(window, "Choose a file", if (isLoad) LOAD else SAVE) {
+        object : FileDialog(window, title, if (isLoad) LOAD else SAVE) {
             override fun setVisible(value: Boolean) {
                 super.setVisible(value)
                 if (value) {
@@ -49,9 +49,6 @@ fun FrameWindowScope.FileDialog(
                     }
                 }
             }
-        }.apply {
-            this.title = title
-            this.file = "*.kts"
         }
     },
     dispose = FileDialog::dispose
@@ -65,9 +62,9 @@ fun WindowScope.YesNoCancelDialog(
     onResult: (result: AlertDialogResult) -> Unit
 ) {
     DisposableEffect(Unit) {
-        val job = GlobalScope.launch(Dispatchers.IO) {
+        val job = GlobalScope.launch(Dispatchers.Default) {
             val resultInt = JOptionPane.showConfirmDialog(
-                window, message, title, JOptionPane.YES_NO_CANCEL_OPTION
+                window, message, title, JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE
             )
             val result = when (resultInt) {
                 JOptionPane.YES_OPTION -> AlertDialogResult.Yes

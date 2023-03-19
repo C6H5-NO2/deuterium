@@ -1,5 +1,6 @@
 package com.c6h5no2.deuterium.ui.runner
 
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -8,6 +9,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.text.selection.DisableSelection
 import androidx.compose.foundation.text.selection.SelectionContainer
@@ -47,7 +49,7 @@ fun runnerView(runner: RunnerModel) {
 
 @Composable
 private fun runPanelLines(runner: RunnerModel) = with(LocalDensity.current) {
-    Box(Modifier.fillMaxSize()) {
+    Box(Modifier.fillMaxSize().horizontalScroll(rememberScrollState())) {
         if (runner.runnerOutputs.size != 0) {
             val scrollState = rememberLazyListState()
 

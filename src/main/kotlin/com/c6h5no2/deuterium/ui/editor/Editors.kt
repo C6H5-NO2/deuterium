@@ -43,7 +43,8 @@ class Editors {
     }
 
     private fun close(editor: Editor) {
-        // todo: close file
+        // according to the call chain, any modification should be properly handled before
+        // maybe consider adding a callback to double check
         editor.onModified = null
         val index = editors.indexOf(editor)
         editors.remove(editor)

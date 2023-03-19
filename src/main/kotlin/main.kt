@@ -1,7 +1,9 @@
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.res.loadImageBitmap
 import androidx.compose.ui.res.useResource
+import androidx.compose.ui.window.FrameWindowScope
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.WindowPlacement
 import androidx.compose.ui.window.WindowState
@@ -15,7 +17,9 @@ import com.c6h5no2.deuterium.ui.editor.Editors
 import com.c6h5no2.deuterium.ui.filetree.FileTree
 import com.c6h5no2.deuterium.ui.menuBar
 import com.c6h5no2.deuterium.ui.runner.RunnerModel
-import com.c6h5no2.deuterium.util.FileDialog
+import com.c6h5no2.deuterium.util.dialog.DialogModel
+import com.c6h5no2.deuterium.util.dialog.FileDialog
+import com.c6h5no2.deuterium.util.dialog.YesNoCancelDialog
 
 
 fun main() = application {
@@ -24,13 +28,15 @@ fun main() = application {
             val editors = Editors()
             val viewer = CodeViewer(
                 editors = editors,
-                fileTree = FileTree(HomeFolder, opener = { mainModel.openFile(it) }),
+                fileTree = FileTree(HomeFolder, opener = { mainModel.requestOpenFile(it) }),
                 settings = Settings()
             )
             mainModel.codeViewer = viewer
             val runner = RunnerModel()
             runner.onErrorClick = { row, col -> editors.active?.moveCursorTo(row, col) }
             mainModel.runner = runner
+            val dialogs = DialogModel()
+            mainModel.dialogs = dialogs
         }
     }
 
@@ -44,10 +50,25 @@ fun main() = application {
     ) {
         MainView(mainModel)
         menuBar(mainModel)
-
-        if (mainModel.openDialog.isAwaiting)
-            FileDialog("Open file", isLoad = true, onResult = { mainModel.openDialog.onResult(it) })
+        dialogWindows(mainModel.dialogs)
     }
+}
+
+
+@Composable
+fun FrameWindowScope.dialogWindows(model: DialogModel) {
+    if (model.openResultDeferred.isAwaiting)
+        FileDialog("Open file", isLoad = true, onResult = { model.openResultDeferred.onResult(it) })
+
+    if (model.saveResultDeferred.isAwaiting)
+        FileDialog("Save file", isLoad = false, onResult = { model.saveResultDeferred.onResult(it) })
+
+    if (model.askToSaveResultDeferred.isAwaiting)
+        YesNoCancelDialog(
+            "Save changes?",
+            message = "File modified, save changes?",
+            onResult = { model.askToSaveResultDeferred.onResult(it) }
+        )
 }
 
 

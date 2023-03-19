@@ -14,7 +14,7 @@
    limitations under the License.
 */
 
-package com.c6h5no2.deuterium.util
+package com.c6h5no2.deuterium.util.dialog
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -22,7 +22,7 @@ import androidx.compose.runtime.setValue
 import kotlinx.coroutines.CompletableDeferred
 
 
-class DialogState<T> {
+class JbDialogState<T> {
     private var onResult: CompletableDeferred<T>? by mutableStateOf(null)
 
     val isAwaiting get() = onResult != null
