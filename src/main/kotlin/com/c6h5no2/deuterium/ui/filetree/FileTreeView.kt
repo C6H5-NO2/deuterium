@@ -126,14 +126,7 @@ private fun FileItemIcon(modifier: Modifier, model: FileTree.Item) = Box(modifie
         }
         is FileTree.ItemType.File -> when (type.ext) {
             "kt" -> Icon(Icons.Default.Code, contentDescription = null, tint = Color(0xFF3E86A0))
-            "xml" -> Icon(Icons.Default.Code, contentDescription = null, tint = Color(0xFFC19C5F))
-            "txt" -> Icon(Icons.Default.Description, contentDescription = null, tint = Color(0xFF87939A))
-            "md" -> Icon(Icons.Default.Description, contentDescription = null, tint = Color(0xFF87939A))
-            "gitignore" -> Icon(Icons.Default.BrokenImage, contentDescription = null, tint = Color(0xFF87939A))
-            "gradle" -> Icon(Icons.Default.Build, contentDescription = null, tint = Color(0xFF87939A))
-            "kts" -> Icon(Icons.Default.Build, contentDescription = null, tint = Color(0xFF3E86A0))
-            "properties" -> Icon(Icons.Default.Settings, contentDescription = null, tint = Color(0xFF62B543))
-            "bat" -> Icon(Icons.Default.Launch, contentDescription = null, tint = Color(0xFF87939A))
+            "kts" -> Icon(Icons.Default.Code, contentDescription = null, tint = Color(0xFF3E86A0))
             else -> Icon(Icons.Default.TextSnippet, contentDescription = null, tint = Color(0xFF87939A))
         }
     }

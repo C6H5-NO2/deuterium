@@ -106,7 +106,7 @@ class Editor(
                             textLines.setAllText(value)
                             onModified?.invoke()
                         }
-                    override val isCode: Boolean = file.name.endsWith(".kts", ignoreCase = true)
+                    override val isCode: Boolean = file.jvmFile.extension.lowercase() in listOf("kt", "kts")
                 }
                 override var cursorSelection: TextRange by mutableStateOf(TextRange.Zero)
             }

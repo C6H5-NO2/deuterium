@@ -64,7 +64,6 @@ import com.c6h5no2.deuterium.ui.common.Fonts
 import com.c6h5no2.deuterium.ui.common.Settings
 import com.c6h5no2.deuterium.util.loadableScoped
 import kotlin.math.absoluteValue
-import kotlin.text.Regex.Companion.fromLiteral
 
 
 private val logger = mu.KotlinLogging.logger {}
@@ -190,23 +189,6 @@ private fun LineNumber(number: String, modifier: Modifier, settings: Settings) =
     modifier = modifier.padding(start = 12.dp)
 )
 
-// @Composable
-// private fun LineContent(content: Editor.Content, modifier: Modifier, settings: Settings) = Text(
-//     text = if (content.isCode) {
-//         codeString(content.value.value)
-//     } else {
-//         buildAnnotatedString {
-//             withStyle(AppTheme.code.simple) {
-//                 append(content.value.value)
-//             }
-//         }
-//     },
-//     fontSize = settings.fontSize,
-//     fontFamily = Fonts.jetbrainsMono(),
-//     modifier = modifier,
-//     softWrap = false
-// )
-
 @Composable
 fun codeContent(lines: Editor.Lines, modifier: Modifier, settings: Settings) {
     val annotated =
@@ -220,7 +202,6 @@ fun codeContent(lines: Editor.Lines, modifier: Modifier, settings: Settings) {
     BasicTextField(
         value = value,
         onValueChange = {
-            logger.info { "OVC ${it.text} :: ${it.selection} || $it :||" }
             lines.content.text = it.text
             lines.cursorSelection = it.selection
             composition = it.composition
@@ -238,38 +219,17 @@ fun codeContent(lines: Editor.Lines, modifier: Modifier, settings: Settings) {
 
 private fun codeString(str: String) = buildAnnotatedString {
     withStyle(AppTheme.code.simple) {
-        val strFormatted = str.replace("\t", "    ")
-        append(strFormatted)
-        addStyle(AppTheme.code.punctuation, strFormatted, ":")
-        addStyle(AppTheme.code.punctuation, strFormatted, "=")
-        addStyle(AppTheme.code.punctuation, strFormatted, "\"")
-        addStyle(AppTheme.code.punctuation, strFormatted, "[")
-        addStyle(AppTheme.code.punctuation, strFormatted, "]")
-        addStyle(AppTheme.code.punctuation, strFormatted, "{")
-        addStyle(AppTheme.code.punctuation, strFormatted, "}")
-        addStyle(AppTheme.code.punctuation, strFormatted, "(")
-        addStyle(AppTheme.code.punctuation, strFormatted, ")")
-        addStyle(AppTheme.code.punctuation, strFormatted, ",")
-        addStyle(AppTheme.code.keyword, strFormatted, "fun ")
-        addStyle(AppTheme.code.keyword, strFormatted, "val ")
-        addStyle(AppTheme.code.keyword, strFormatted, "var ")
-        addStyle(AppTheme.code.keyword, strFormatted, "private ")
-        addStyle(AppTheme.code.keyword, strFormatted, "internal ")
-        addStyle(AppTheme.code.keyword, strFormatted, "for ")
-        addStyle(AppTheme.code.keyword, strFormatted, "expect ")
-        addStyle(AppTheme.code.keyword, strFormatted, "actual ")
-        addStyle(AppTheme.code.keyword, strFormatted, "import ")
-        addStyle(AppTheme.code.keyword, strFormatted, "package ")
-        addStyle(AppTheme.code.value, strFormatted, "true")
-        addStyle(AppTheme.code.value, strFormatted, "false")
-        addStyle(AppTheme.code.value, strFormatted, Regex("[0-9]*"))
-        addStyle(AppTheme.code.annotation, strFormatted, Regex("^@[a-zA-Z_]*"))
-        addStyle(AppTheme.code.comment, strFormatted, Regex("^\\s*//.*"))
+        append(str)
+        addStyle(AppTheme.code.comment, str, Regex("//.*"))
+        addStyle(AppTheme.code.value, str, Regex("[0-9]+"))
+        // https://kotlinlang.org/docs/keyword-reference.html#hard-keywords
+        val keywords = listOf(
+            "as", "break", "class", "continue", "do", "else", "false", "for", "fun", "if",
+            "in", "interface", "is", "null", "object", "package", "return", "super", "this",
+            "throw", "true", "try", "typealias", "typeof", "val", "var", "when", "while"
+        ).joinToString(separator = "|", prefix = "\\b(", postfix = ")\\b")
+        addStyle(AppTheme.code.keyword, str, Regex(keywords))
     }
-}
-
-private fun AnnotatedString.Builder.addStyle(style: SpanStyle, text: String, regexp: String) {
-    addStyle(style, text, fromLiteral(regexp))
 }
 
 private fun AnnotatedString.Builder.addStyle(style: SpanStyle, text: String, regexp: Regex) {
