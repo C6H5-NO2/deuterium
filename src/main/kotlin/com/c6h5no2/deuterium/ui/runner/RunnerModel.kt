@@ -22,12 +22,15 @@ class RunnerModel {
     var filename by mutableStateOf(".kts")
         private set
 
-    var runnerOutputs: RunnerOutputs = RunnerOutputs()
+    var runnerOutputs = RunnerOutputs()
         private set
+
+    var onErrorClick: ((row: Int, col: Int) -> Unit)? = null
 
     // no need to lock, the value is irrelevant
     var updateFlip by mutableStateOf(false)
         private set
+
 
     suspend fun runOnce(file: File) {
         if (isRunning)
@@ -59,28 +62,26 @@ class RunnerModel {
                 val process = pb.start()
                 process.outputStream.close()
 
-                thread {
+                val ostream = thread {
                     readFromStream(process.inputStream, RunnerOutputType.OUTPUT_STREAM)
                 }
 
-                thread {
+                val estream = thread {
                     readFromStream(process.errorStream, RunnerOutputType.ERROR_STREAM)
-                }
-
-                while (process.isAlive) {
-                    Thread.sleep(100)
-                    updateFlip = !updateFlip
                 }
 
                 val exitCode = process.waitFor()
                 val msg = "Process finished with ${if (exitCode == 0) "" else "non-zero "}exit code $exitCode"
                 logger.info { msg }
+                ostream.join()
+                estream.join()
                 runnerOutputs.appendSegment("\n\n$msg\n\n", RunnerOutputType.PROCESS_INFO)
             } catch (e: IOException) {
                 val msg = "Process failed with $e"
                 logger.info { msg }
                 runnerOutputs.appendSegment("\n\n$msg\n\n", RunnerOutputType.PROCESS_FATAL)
             } finally {
+                updateFlip = !updateFlip
                 isRunning = false
             }
         }
@@ -89,14 +90,16 @@ class RunnerModel {
 
     private fun readFromStream(istream: InputStream, type: RunnerOutputType) {
         val buffer = CharArray(1024)
-        var bytesRead: Int
-        while (true) {
-            bytesRead = istream.reader().read(buffer)
-            logger.info { "Read $bytesRead bytes with $updateFlip" }
-            updateFlip = !updateFlip
-            if (bytesRead == -1)
-                break
-            runnerOutputs.appendSegment(String(buffer, 0, bytesRead), type)
+        var charsRead: Int
+        istream.reader(Charsets.UTF_8).use {
+            while (true) {
+                charsRead = it.read(buffer)
+                logger.info { "Read $charsRead chars from stream to $type" }
+                if (charsRead == -1)
+                    break
+                runnerOutputs.appendSegment(String(buffer, 0, charsRead), type)
+                updateFlip = !updateFlip
+            }
         }
     }
 }

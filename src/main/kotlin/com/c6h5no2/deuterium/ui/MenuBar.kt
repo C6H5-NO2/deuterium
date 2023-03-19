@@ -36,7 +36,7 @@ fun FrameWindowScope.menuBar(mainModel: MainModel) = MenuBar {
     Menu("Run", mnemonic = 'R') {
         Item(
             "Run Once",
-            enabled = mainModel.editorState == MainModel.EditorState.LOADED && !mainModel.runner.isRunning
+            enabled = mainModel.editorState == MainModel.EditorState.LOADED && mainModel.runnerState == MainModel.RunnerState.STOPPED
         ) { runOnce() }
         // Item("Run Multiple", enabled = true) {}
         // Separator()

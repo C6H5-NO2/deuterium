@@ -23,6 +23,7 @@ import androidx.compose.runtime.setValue
 interface TextLines {
     val size: Int
     // fun get(index: Int): String
+    val linefeedIndex: List<Int>
     fun getAllText(): String
     fun setAllText(value: String)
 }

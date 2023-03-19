@@ -60,7 +60,8 @@ private fun runPanelLines(runner: RunnerModel) = with(LocalDensity.current) {
                         runPanelLine(
                             Modifier.align(Alignment.CenterStart),
                             runner.runnerOutputs.getTyped(index),
-                            runner.filename
+                            runner.filename,
+                            runner.onErrorClick
                         )
                     }
                 }
@@ -76,7 +77,12 @@ private fun runPanelLines(runner: RunnerModel) = with(LocalDensity.current) {
 
 
 @Composable
-private fun runPanelLine(modifier: Modifier, segs: List<RunnerOutputSeg>, filename: String) {
+private fun runPanelLine(
+    modifier: Modifier,
+    segs: List<RunnerOutputSegment>,
+    filename: String,
+    onErrorClick: ((Int, Int) -> Unit)?
+) {
     Row(modifier) {
         val text = styledString(segs, filename)
         val textModifier = Modifier.withoutWidthConstraints().padding(start = 6.dp, end = 12.dp)
@@ -95,8 +101,8 @@ private fun runPanelLine(modifier: Modifier, segs: List<RunnerOutputSeg>, filena
                     assert(rc.size == 3)
                     val row = rc[1].toInt()
                     val col = rc[2].toInt()
+                    onErrorClick?.invoke(row, col)
                     logger.info { "Move cursor to r$row:c$col" }
-                    // todo: jump cursor
                 }
             }
         }
@@ -104,7 +110,7 @@ private fun runPanelLine(modifier: Modifier, segs: List<RunnerOutputSeg>, filena
 }
 
 
-private fun styledString(segs: List<RunnerOutputSeg>, filename: String) = buildAnnotatedString {
+private fun styledString(segs: List<RunnerOutputSegment>, filename: String) = buildAnnotatedString {
     withStyle(AppTheme.code.simple) {
         val regex = Regex("${Regex.escape(filename)}(?::(\\d+))?(?::(\\d+))?")
         segs.forEach {

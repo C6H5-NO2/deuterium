@@ -44,25 +44,35 @@ fun java.io.File.toProjectFile(): JbFile = object : JbFile {
 
     override fun readLines(scope: CoroutineScope): TextLines {
         var text by mutableStateOf("")
+        var linefeedIdx by mutableStateOf(listOf<Int>())
         var lineCount by mutableStateOf(0)
         scope.launch(Dispatchers.IO) {
             val stream = this@toProjectFile.inputStream()
             // the script file is relatively small
-            text = stream.bufferedReader().use { it.readText() }
-            lineCount = 1 + text.count { it == '\n' }
+            text = stream.bufferedReader(Charsets.UTF_8).use { it.readText() }.replace("\t", "    ")
+            linefeedIdx = text.asSequence().withIndex().filter { it.value == '\n' }.map { it.index }.toList()
+            lineCount = 1 + linefeedIdx.size
         }
         return object : TextLines {
             override val size: Int
                 get() {
                     if (lineCount == -1)
-                        lineCount = 1 + text.count { it == '\n' }
+                        lineCount = 1 + linefeedIndex.size
                     return lineCount
+                }
+
+            override val linefeedIndex: List<Int>
+                get() {
+                    if (linefeedIdx.getOrElse(0, defaultValue = { -1 }) == -1)
+                        linefeedIdx = text.asSequence().withIndex().filter { it.value == '\n' }.map { it.index }.toList()
+                    return linefeedIdx
                 }
 
             override fun getAllText(): String = text
 
             override fun setAllText(value: String) {
-                text = value
+                text = value.replace("\t", "    ")
+                linefeedIdx = listOf(-1)
                 lineCount = -1
             }
         }

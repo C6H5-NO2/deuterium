@@ -13,7 +13,7 @@ class RunnerOutputs {
         else
             ""
 
-    fun getTyped(index: Int): List<RunnerOutputSeg> =
+    fun getTyped(index: Int): List<RunnerOutputSegment> =
         if (index < lines.size)
             Collections.unmodifiableList(lines[index].segments)
         else
@@ -32,7 +32,7 @@ class RunnerOutputs {
                 if (idx > 0)
                     lines.add(RunnerOutputLine())
                 if (it.isNotEmpty())
-                    lines.last().segments.add(RunnerOutputSeg(it, type))
+                    lines.last().segments.add(RunnerOutputSegment(it.replace("\t", "    "), type))
             }
         } finally {
             lock.unlock()
@@ -41,11 +41,9 @@ class RunnerOutputs {
 }
 
 
-data class RunnerOutputLine(val segments: ArrayList<RunnerOutputSeg> = ArrayList(2))
+data class RunnerOutputLine(val segments: ArrayList<RunnerOutputSegment> = ArrayList(2))
 
-
-data class RunnerOutputSeg(val str: String, val type: RunnerOutputType)
-
+data class RunnerOutputSegment(val str: String, val type: RunnerOutputType)
 
 enum class RunnerOutputType {
     OUTPUT_STREAM, ERROR_STREAM, PROCESS_INFO, PROCESS_FATAL

@@ -29,6 +29,7 @@ fun main() = application {
             )
             mainModel.codeViewer = viewer
             val runner = RunnerModel()
+            runner.onErrorClick = { row, col -> editors.active?.moveCursorTo(row, col) }
             mainModel.runner = runner
         }
     }

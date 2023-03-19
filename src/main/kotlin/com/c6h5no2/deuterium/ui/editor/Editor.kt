@@ -16,6 +16,10 @@
 
 package com.c6h5no2.deuterium.ui.editor
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.text.TextRange
 import com.c6h5no2.deuterium.platform.JbFile
 import com.c6h5no2.deuterium.util.SingleSelection
 import kotlinx.coroutines.CoroutineScope
@@ -48,13 +52,32 @@ class Editor(
         selection.selected = this
     }
 
+    fun moveCursorTo(row: Int, col: Int) {
+        require(row > 0 && col > 0) { "moveCursorTo :$row:$col is invalid" }
+        val lines = this.lines ?: return
+        val textLen = lines.content.text.length
+        val linefeedIndex = lines.linefeedIndex
+        val index = if (row > 1 + linefeedIndex.size) {
+            // exceed # row
+            textLen
+        } else {
+            val prevLF = linefeedIndex.getOrElse((row - 1) - 1) { -1 }
+            val lineEnd = linefeedIndex.getOrElse(row - 1) { textLen }
+            val numCol = lineEnd - prevLF
+            prevLF + minOf(col, numCol)
+        }
+        lines.cursorSelection = TextRange(index)
+    }
+
     class Line(val number: Int, val content: Content? = null)
 
     interface Lines {
         val lineNumberDigitCount: Int get() = size.toString().length
         val size: Int
         // operator fun get(index: Int): Line
+        val linefeedIndex: List<Int>
         val content: Content
+        var cursorSelection: TextRange
     }
 
     interface Content {
@@ -73,6 +96,7 @@ class Editor(
             }
             this.lines = object : Editor.Lines {
                 override val size get() = textLines.size
+                override val linefeedIndex: List<Int> get() = textLines.linefeedIndex
                 override val content = object : Editor.Content {
                     override var text: String
                         get() = textLines.getAllText()
@@ -84,6 +108,7 @@ class Editor(
                         }
                     override val isCode: Boolean = file.name.endsWith(".kts", ignoreCase = true)
                 }
+                override var cursorSelection: TextRange by mutableStateOf(TextRange.Zero)
             }
             return@impl true
         }

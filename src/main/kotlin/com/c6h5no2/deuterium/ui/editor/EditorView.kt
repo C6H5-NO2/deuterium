@@ -214,16 +214,15 @@ fun codeContent(lines: Editor.Lines, modifier: Modifier, settings: Settings) {
             codeString(lines.content.text)
         else
             AnnotatedString(lines.content.text)
-    var selection by remember { mutableStateOf(TextRange.Zero) }
     var composition: TextRange? by remember { mutableStateOf(null) }
-    val value = TextFieldValue(annotated, selection, composition)
+    val value = TextFieldValue(annotated, lines.cursorSelection, composition)
     val colors = TextFieldDefaults.textFieldColors()
     BasicTextField(
         value = value,
         onValueChange = {
             logger.info { "OVC ${it.text} :: ${it.selection} || $it :||" }
             lines.content.text = it.text
-            selection = it.selection
+            lines.cursorSelection = it.selection
             composition = it.composition
         },
         modifier = modifier.background(colors.backgroundColor(enabled = true).value),
