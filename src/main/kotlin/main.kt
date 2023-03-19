@@ -1,5 +1,6 @@
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.res.loadImageBitmap
 import androidx.compose.ui.res.useResource
@@ -20,30 +21,31 @@ import com.c6h5no2.deuterium.ui.runner.RunnerModel
 import com.c6h5no2.deuterium.util.dialog.DialogModel
 import com.c6h5no2.deuterium.util.dialog.FileDialog
 import com.c6h5no2.deuterium.util.dialog.YesNoCancelDialog
+import kotlinx.coroutines.launch
 
 
 fun main() = application {
+    val scope = rememberCoroutineScope()
+
     val mainModel = remember {
         MainModel().also { mainModel ->
-            val editors = Editors()
-            val viewer = CodeViewer(
-                editors = editors,
-                fileTree = FileTree(HomeFolder, opener = { mainModel.requestOpenFile(it) }),
+            mainModel.appExitFunc = ::exitApplication
+            mainModel.codeViewer = CodeViewer(
+                editors = Editors(),
+                fileTree = FileTree(HomeFolder, opener = { scope.launch { mainModel.requestOpenFile(it) } }),
                 settings = Settings()
             )
-            mainModel.codeViewer = viewer
-            val runner = RunnerModel()
-            runner.onErrorClick = { row, col -> editors.active?.moveCursorTo(row, col) }
-            mainModel.runner = runner
-            val dialogs = DialogModel()
-            mainModel.dialogs = dialogs
+            mainModel.runner = RunnerModel().also { runner ->
+                runner.onErrorClick = { row, col -> mainModel.codeViewer.editors.active?.moveCursorTo(row, col) }
+            }
+            mainModel.dialogs = DialogModel()
         }
     }
 
     val windowState = remember { WindowState(WindowPlacement.Maximized) }
 
     Window(
-        onCloseRequest = this::exitApplication,
+        onCloseRequest = { scope.launch { mainModel.requestExitApp() } },
         title = mainModel.getTitle(),
         state = windowState,
         icon = BitmapPainter(useResource("ic_launcher.png", ::loadImageBitmap)),

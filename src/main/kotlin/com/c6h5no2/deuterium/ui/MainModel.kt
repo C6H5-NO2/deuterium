@@ -8,9 +8,6 @@ import com.c6h5no2.deuterium.platform.toProjectFile
 import com.c6h5no2.deuterium.ui.runner.RunnerModel
 import com.c6h5no2.deuterium.util.dialog.AlertDialogResult
 import com.c6h5no2.deuterium.util.dialog.DialogModel
-import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import java.io.File
 import java.io.IOException
 import java.nio.file.Files
@@ -21,7 +18,12 @@ import java.util.*
 private val logger = mu.KotlinLogging.logger {}
 
 class MainModel {
-    val currentFile get() = codeViewer.editors.active?.file?.jvmFile
+    lateinit var appExitFunc: () -> Unit
+
+    suspend fun requestExitApp() {
+        if (askToSaveFile())
+            appExitFunc()
+    }
 
 
     // ------- dialogs -------
@@ -32,6 +34,8 @@ class MainModel {
     // ------- editor -------
 
     lateinit var codeViewer: CodeViewer
+
+    val currentFile get() = codeViewer.editors.active?.file?.jvmFile
 
     var editorState by mutableStateOf(EditorState.EMPTY)
         private set
@@ -45,17 +49,15 @@ class MainModel {
     }
 
 
-    @OptIn(DelicateCoroutinesApi::class)
-    fun requestOpenFile(file: JbFile) {
+    suspend fun requestOpenFile(file: JbFile) {
         if (!file.jvmFile.isFile)
             return
         if (editorState == EditorState.MODIFIED) {
-            GlobalScope.launch {
-                if (askToSaveFile())
-                    openFile(file)
-            }
-        } else
+            if (askToSaveFile())
+                openFile(file)
+        } else {
             openFile(file)
+        }
     }
 
 
@@ -111,7 +113,7 @@ class MainModel {
 
 
     /** @return `true` if the file saving request has been properly handled. `false` otherwise. */
-    suspend fun askToSaveFile(): Boolean {
+    private suspend fun askToSaveFile(): Boolean {
         if (editorState != EditorState.MODIFIED)
             return true
         return when (dialogs.askToSaveResultDeferred.awaitResult()) {

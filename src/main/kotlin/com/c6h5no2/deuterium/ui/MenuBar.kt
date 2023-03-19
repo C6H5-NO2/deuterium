@@ -16,31 +16,31 @@ fun FrameWindowScope.menuBar(mainModel: MainModel) = MenuBar {
     val scope = rememberCoroutineScope()
 
     fun newFile() = scope.launch { println("todo: new") }
-    fun openFile() = scope.launch { mainModel.requestOpenFile() }
-    fun saveFile() = scope.launch { mainModel.requestSaveFile() }
-    fun exitApp() = scope.launch { println("todo: exit") }
 
     Menu("File", mnemonic = 'F') {
         Item("New", shortcut = KeyShortcut(Key.N, ctrl = true)) { newFile() }
-        Item("Open", shortcut = KeyShortcut(Key.O, ctrl = true)) { openFile() }
+        Item(
+            "Open",
+            shortcut = KeyShortcut(Key.O, ctrl = true),
+            onClick = { scope.launch { mainModel.requestOpenFile() } }
+        )
         Separator()
         Item(
             "Save",
             enabled = mainModel.editorState == MainModel.EditorState.MODIFIED,
-            shortcut = KeyShortcut(Key.S, ctrl = true)
-        ) { saveFile() }
+            shortcut = KeyShortcut(Key.S, ctrl = true),
+            onClick = { scope.launch { mainModel.requestSaveFile() } }
+        )
         Separator()
-        Item("Exit") { exitApp() }
+        Item("Exit") { scope.launch { mainModel.requestExitApp() } }
     }
-
-    fun runOnce() = scope.launch { mainModel.runOnce() }
 
     Menu("Run", mnemonic = 'R') {
         Item(
             "Run Once",
             enabled = mainModel.editorState != MainModel.EditorState.EMPTY
                     && mainModel.runnerState == MainModel.RunnerState.STOPPED
-        ) { runOnce() }
+        ) { scope.launch { mainModel.runOnce() } }
         // Item("Run Multiple", enabled = true) {}
         Separator()
         Item("Edit Configuration") {}
