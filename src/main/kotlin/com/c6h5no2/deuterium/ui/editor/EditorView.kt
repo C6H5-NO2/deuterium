@@ -44,6 +44,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -51,8 +52,10 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import com.c6h5no2.deuterium.platform.VerticalScrollbar
@@ -67,18 +70,18 @@ import kotlin.text.Regex.Companion.fromLiteral
 private val logger = mu.KotlinLogging.logger {}
 
 @Composable
-fun EditorView(model: Editor, settings: Settings) = key(model) {
+fun EditorView(editor: Editor, settings: Settings) = key(editor) {
     with(LocalDensity.current) {
         SelectionContainer {
             Surface(
                 Modifier.fillMaxSize(),
                 color = AppTheme.colors.backgroundDark,
             ) {
-                val lines by loadableScoped(model.lines)
+                val loaded by loadableScoped(editor.loader)
 
-                if (lines != null) {
+                if (loaded == true) {
                     Box {
-                        Lines(lines!!, model, settings)
+                        Lines(editor.lines!!, editor, settings)
                         // Box(
                         //     Modifier
                         //         .offset(x = settings.fontSize.toDp() * 0.5f * settings.maxLineSymbols)
@@ -132,16 +135,16 @@ private fun Lines(lines: Editor.Lines, editor: Editor, settings: Settings) = wit
             ) {
                 items(lines.size) { index ->
                     Box(Modifier.height(settings.fontSize.toDp() * 1.6f)) {
-                        Line(Modifier.align(Alignment.CenterStart), maxNum, lines[index], settings)
+                        Line(Modifier.align(Alignment.CenterStart), maxNum, Editor.Line(index + 1), settings)
                     }
                 }
             }
 
             codeContent(
-                editor,
+                lines,
                 Modifier
+                    .padding(start = 20.dp, end = 12.dp)
                     .fillMaxSize()
-                    .padding(start = 28.dp, end = 12.dp)
                     .horizontalScroll(rememberScrollState())
                     .verticalScroll(editorScrollState),
                 settings
@@ -187,32 +190,41 @@ private fun LineNumber(number: String, modifier: Modifier, settings: Settings) =
     modifier = modifier.padding(start = 12.dp)
 )
 
-@Composable
-private fun LineContent(content: Editor.Content, modifier: Modifier, settings: Settings) = Text(
-    text = if (content.isCode) {
-        codeString(content.value.value)
-    } else {
-        buildAnnotatedString {
-            withStyle(AppTheme.code.simple) {
-                append(content.value.value)
-            }
-        }
-    },
-    fontSize = settings.fontSize,
-    fontFamily = Fonts.jetbrainsMono(),
-    modifier = modifier,
-    softWrap = false
-)
+// @Composable
+// private fun LineContent(content: Editor.Content, modifier: Modifier, settings: Settings) = Text(
+//     text = if (content.isCode) {
+//         codeString(content.value.value)
+//     } else {
+//         buildAnnotatedString {
+//             withStyle(AppTheme.code.simple) {
+//                 append(content.value.value)
+//             }
+//         }
+//     },
+//     fontSize = settings.fontSize,
+//     fontFamily = Fonts.jetbrainsMono(),
+//     modifier = modifier,
+//     softWrap = false
+// )
 
 @Composable
-fun codeContent(editor: Editor, modifier: Modifier, settings: Settings) {
-    val value = remember { mutableStateOf((1..100).joinToString("") { "$it\n" }) }  // todo
+fun codeContent(lines: Editor.Lines, modifier: Modifier, settings: Settings) {
+    val annotated =
+        if (lines.content.isCode)
+            codeString(lines.content.text)
+        else
+            AnnotatedString(lines.content.text)
+    var selection by remember { mutableStateOf(TextRange.Zero) }
+    var composition: TextRange? by remember { mutableStateOf(null) }
+    val value = TextFieldValue(annotated, selection, composition)
     val colors = TextFieldDefaults.textFieldColors()
     BasicTextField(
-        value = value.value,
+        value = value,
         onValueChange = {
-            // todo
-            value.value = it
+            logger.info { "OVC ${it.text} :: ${it.selection} || $it :||" }
+            lines.content.text = it.text
+            selection = it.selection
+            composition = it.composition
         },
         modifier = modifier.background(colors.backgroundColor(enabled = true).value),
         textStyle = TextStyle(

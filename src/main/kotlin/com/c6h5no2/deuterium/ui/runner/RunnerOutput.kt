@@ -1,21 +1,20 @@
 package com.c6h5no2.deuterium.ui.runner
 
-import com.c6h5no2.deuterium.util.TextLines
 import java.util.*
 import java.util.concurrent.locks.ReentrantLock
 
 
-class RunnerOutputs : TextLines {
-    override val size: Int get() = lines.size
+class RunnerOutputs {
+    val size: Int get() = lines.size
 
-    override operator fun get(index: Int): String =
-        if (index < size)
+    operator fun get(index: Int): String =
+        if (index < lines.size)
             lines[index].segments.joinToString(separator = "") { it.str }
         else
             ""
 
     fun getTyped(index: Int): List<RunnerOutputSeg> =
-        if (index < size)
+        if (index < lines.size)
             Collections.unmodifiableList(lines[index].segments)
         else
             listOf()

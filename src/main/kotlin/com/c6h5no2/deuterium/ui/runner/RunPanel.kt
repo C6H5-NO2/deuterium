@@ -32,6 +32,7 @@ private val logger = mu.KotlinLogging.logger {}
 
 @Composable
 fun runnerView(runner: RunnerModel) {
+    // force update ui
     Box(Modifier.fillMaxSize(if (runner.updateFlip) 1f else .999f)) {
         Column(Modifier.align(Alignment.Center)) {
             SelectionContainer {

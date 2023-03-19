@@ -26,9 +26,11 @@ class MainModel {
 
     fun openFile(file: JbFile) {
         // todo: check save state
-        if (!file.jvmFile.isFile) return
+        if (!file.jvmFile.isFile)
+            return
         logger.info { "Open file ${file.jvmFile.absolutePath}" }
         codeViewer.editors.open(file)
+        codeViewer.editors.active?.onModified = { editorState = EditorState.MODIFIED }
         editorState = EditorState.LOADED
     }
 

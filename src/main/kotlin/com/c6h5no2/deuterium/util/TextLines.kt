@@ -16,14 +16,13 @@
 
 package com.c6h5no2.deuterium.util
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+
 interface TextLines {
     val size: Int
-    fun get(index: Int): String
-}
-
-object EmptyTextLines : TextLines {
-    override val size: Int
-        get() = 0
-
-    override fun get(index: Int): String = ""
+    // fun get(index: Int): String
+    fun getAllText(): String
+    fun setAllText(value: String)
 }

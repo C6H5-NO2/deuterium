@@ -16,18 +16,23 @@
 
 package com.c6h5no2.deuterium.ui.editor
 
-import androidx.compose.runtime.State
-import androidx.compose.runtime.mutableStateOf
 import com.c6h5no2.deuterium.platform.JbFile
-import com.c6h5no2.deuterium.util.EmptyTextLines
 import com.c6h5no2.deuterium.util.SingleSelection
 import kotlinx.coroutines.CoroutineScope
 
 
+private val logger = mu.KotlinLogging.logger {}
+
 class Editor(
-    val file: JbFile,
-    val lines: (backgroundScope: CoroutineScope) -> Lines,
+    val file: JbFile
 ) {
+    val loader: ((scope: CoroutineScope) -> Boolean)
+
+    var lines: Lines? = null
+        private set
+
+    var onModified: (() -> Unit)? = null
+
     var close: (() -> Unit)? = null
     lateinit var selection: SingleSelection
 
@@ -43,40 +48,44 @@ class Editor(
         selection.selected = this
     }
 
-    class Line(val number: Int, val content: Content)
+    class Line(val number: Int, val content: Content? = null)
 
     interface Lines {
         val lineNumberDigitCount: Int get() = size.toString().length
         val size: Int
-        operator fun get(index: Int): Line
+        // operator fun get(index: Int): Line
+        val content: Content
     }
 
-    class Content(val value: State<String>, val isCode: Boolean)
-}
-
-fun Editor(file: JbFile) = Editor(
-    file = file
-) { backgroundScope ->
-    val textLines = try {
-        file.readLines(backgroundScope)
-    } catch (e: Throwable) {
-        e.printStackTrace()
-        EmptyTextLines
-    }
-    val isCode = file.name.endsWith(".kts", ignoreCase = true)
-
-    fun content(index: Int): Editor.Content {
-        val text = textLines.get(index)
-        val state = mutableStateOf(text)
-        return Editor.Content(state, isCode)
+    interface Content {
+        var text: String
+        val isCode: Boolean
     }
 
-    object : Editor.Lines {
-        override val size get() = textLines.size
-
-        override fun get(index: Int) = Editor.Line(
-            number = index + 1,
-            content = content(index)
-        )
+    init {
+        loader = impl@{ scope ->
+            logger.info { "Read file ${file.jvmFile.absolutePath}" }
+            val textLines = try {
+                file.readLines(scope)
+            } catch (e: Throwable) {
+                logger.error { e.stackTraceToString() }
+                return@impl false
+            }
+            this.lines = object : Editor.Lines {
+                override val size get() = textLines.size
+                override val content = object : Editor.Content {
+                    override var text: String
+                        get() = textLines.getAllText()
+                        set(value) {
+                            if (text == value)
+                                return
+                            textLines.setAllText(value)
+                            onModified?.invoke()
+                        }
+                    override val isCode: Boolean = file.name.endsWith(".kts", ignoreCase = true)
+                }
+            }
+            return@impl true
+        }
     }
 }
