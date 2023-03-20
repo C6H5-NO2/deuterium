@@ -37,6 +37,8 @@ fun FrameWindowScope.menuBar(mainModel: MainModel) = MenuBar {
             onClick = { scope.launch { mainModel.requestSaveFile() } }
         )
         Separator()
+        Item("Kill") { mainModel.appExitFunc() }
+        Separator()
         Item("Exit") { scope.launch { mainModel.requestExitApp() } }
     }
 
