@@ -17,6 +17,7 @@ import com.c6h5no2.deuterium.ui.common.Settings
 import com.c6h5no2.deuterium.ui.editor.Editors
 import com.c6h5no2.deuterium.ui.filetree.FileTree
 import com.c6h5no2.deuterium.ui.menuBar
+import com.c6h5no2.deuterium.ui.runconfig.runConfigDialog
 import com.c6h5no2.deuterium.ui.runner.RunnerModel
 import com.c6h5no2.deuterium.util.dialog.DialogModel
 import com.c6h5no2.deuterium.util.dialog.FileDialog
@@ -52,6 +53,7 @@ fun main() = application {
     ) {
         MainView(mainModel)
         menuBar(mainModel)
+        runConfigDialog(mainModel.runner.runConfig)
         dialogWindows(mainModel.dialogs)
     }
 }

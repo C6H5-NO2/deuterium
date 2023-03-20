@@ -44,13 +44,15 @@ fun FrameWindowScope.menuBar(mainModel: MainModel) = MenuBar {
 
     Menu("Run", mnemonic = 'R') {
         Item(
-            "Run Once",
+            "Run",
             enabled = mainModel.editorState != MainModel.EditorState.EMPTY
                     && mainModel.runnerState == MainModel.RunnerState.STOPPED
-        ) { scope.launch { mainModel.runOnce() } }
-        // Item("Run Multiple", enabled = true) {}
+        ) { scope.launch { mainModel.runScript() } }
         Separator()
-        Item("Edit Configuration") {}
+        Item(
+            "Edit Configuration",
+            enabled = mainModel.runnerState == MainModel.RunnerState.STOPPED
+        ) { mainModel.runner.runConfig.showDialog = true }
     }
 
     // Menu("Help", mnemonic = 'H') {

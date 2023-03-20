@@ -3,6 +3,7 @@ package com.c6h5no2.deuterium.ui.runner
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import com.c6h5no2.deuterium.ui.runconfig.RunConfig
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -15,6 +16,8 @@ private val logger = mu.KotlinLogging.logger {}
 
 class RunnerModel {
     var expandPanel: (() -> Unit)? = null
+
+    val runConfig = RunConfig()
 
     var isRunning by mutableStateOf(false)
         private set
@@ -42,10 +45,10 @@ class RunnerModel {
 
         val script = file.absolutePath
         logger.info { "Run script $script" }
-        // todo: set from config
+
         val workingDirectory = file.parentFile
-        val kotlinc = "kotlinc"
-        val paramsStr = ""
+        val kotlinc = runConfig.kotlincPath.ifEmpty { "kotlinc" }
+        val paramsStr = runConfig.cmdArgs
         val params = paramsStr.splitToSequence(' ', '\t', '\n', '\r', '\u000c').toList().toTypedArray()
 
         // val command = listOf("\"$kotlinc\"", "-version")

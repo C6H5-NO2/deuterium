@@ -173,7 +173,7 @@ class MainModel {
 
     val runnerState get() = if (runner.isRunning) RunnerState.RUNNING else RunnerState.STOPPED
 
-    suspend fun runOnce() {
+    suspend fun runScript() {
         if (runnerState != RunnerState.STOPPED)
             return
         if (editorState != EditorState.LOADED)
