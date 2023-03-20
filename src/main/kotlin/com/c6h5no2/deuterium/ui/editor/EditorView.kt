@@ -48,6 +48,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.AnnotatedString
@@ -191,6 +193,7 @@ private fun LineNumber(number: String, modifier: Modifier, settings: Settings) =
 
 @Composable
 fun codeContent(lines: Editor.Lines, modifier: Modifier, settings: Settings) {
+    val focusRequester = remember { FocusRequester() }
     val annotated =
         if (lines.content.isCode)
             codeString(lines.content.text)
@@ -206,7 +209,9 @@ fun codeContent(lines: Editor.Lines, modifier: Modifier, settings: Settings) {
             lines.cursorSelection = it.selection
             composition = it.composition
         },
-        modifier = modifier.background(colors.backgroundColor(enabled = true).value),
+        modifier = modifier
+            .background(colors.backgroundColor(enabled = true).value)
+            .focusRequester(focusRequester),
         textStyle = TextStyle(
             color = colors.textColor(enabled = true).value,
             fontSize = settings.fontSize,
@@ -215,6 +220,7 @@ fun codeContent(lines: Editor.Lines, modifier: Modifier, settings: Settings) {
         ),
         cursorBrush = SolidColor(colors.cursorColor(isError = false).value)
     )
+    focusRequester.requestFocus()
 }
 
 private fun codeString(str: String) = buildAnnotatedString {
