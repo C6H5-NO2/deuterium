@@ -99,7 +99,7 @@ fun CodeViewerView(codeViewer: CodeViewer, runner: RunnerModel) {
                     lowerContent = {
                         Box {
                             Column(Modifier.align(Alignment.Center)) {
-                                runnerView(runner)
+                                runnerView(runner, codeViewer.settings)
                                 // StatusBar(codeViewer.settings)
                             }
                         }

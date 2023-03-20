@@ -24,22 +24,23 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.c6h5no2.deuterium.platform.VerticalScrollbar
 import com.c6h5no2.deuterium.ui.common.AppTheme
+import com.c6h5no2.deuterium.ui.common.Fonts
+import com.c6h5no2.deuterium.ui.common.Settings
 import com.c6h5no2.deuterium.util.withoutWidthConstraints
 
 
 private val logger = mu.KotlinLogging.logger {}
 
 @Composable
-fun runnerView(runner: RunnerModel) {
+fun runnerView(runner: RunnerModel, settings: Settings) {
     // force update ui
     Box(Modifier.fillMaxSize(if (runner.updateFlip) 1f else .999f)) {
         Column(Modifier.align(Alignment.Center)) {
             SelectionContainer {
                 Box {
-                    outputPanelLines(runner)
+                    outputPanelLines(runner, settings)
                 }
             }
         }
@@ -48,7 +49,7 @@ fun runnerView(runner: RunnerModel) {
 
 
 @Composable
-private fun outputPanelLines(runner: RunnerModel) = with(LocalDensity.current) {
+private fun outputPanelLines(runner: RunnerModel, settings: Settings) = with(LocalDensity.current) {
     Box(Modifier.fillMaxSize().horizontalScroll(rememberScrollState())) {
         if (runner.runnerOutputs.size != 0) {
             val scrollState = rememberLazyListState()
@@ -58,12 +59,13 @@ private fun outputPanelLines(runner: RunnerModel) = with(LocalDensity.current) {
                 state = scrollState
             ) {
                 items(runner.runnerOutputs.size) { index ->
-                    Box(Modifier.height(17.sp.toDp() * 1.6f)) {
+                    Box(Modifier.height(settings.fontSize.toDp() * settings.lineSpace)) {
                         outputPanelLine(
                             Modifier.align(Alignment.CenterStart),
                             runner.runnerOutputs.getTyped(index),
                             runner.filename,
-                            runner.onErrorClick
+                            runner.onErrorClick,
+                            settings
                         )
                     }
                 }
@@ -83,7 +85,8 @@ private fun outputPanelLine(
     modifier: Modifier,
     segs: List<RunnerOutputSegment>,
     filename: String,
-    onErrorClick: ((Int, Int) -> Unit)?
+    onErrorClick: ((Int, Int) -> Unit)?,
+    settings: Settings
 ) {
     Row(modifier) {
         val text = styledString(segs, filename)
@@ -94,7 +97,11 @@ private fun outputPanelLine(
         DisableSelection {
             ClickableText(
                 text = text,
-                style = TextStyle(fontSize = 17.sp),
+                style = TextStyle(
+                    fontSize = settings.fontSize,
+                    fontFamily = Fonts.jetBrainsMonoNL(),
+                    lineHeight = settings.fontSize * settings.lineSpace
+                ),
                 modifier = textModifier,
                 softWrap = false
             ) { offset ->

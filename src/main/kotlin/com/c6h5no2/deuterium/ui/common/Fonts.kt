@@ -24,57 +24,10 @@ import com.c6h5no2.deuterium.platform.font
 
 object Fonts {
     @Composable
-    fun jetbrainsMono() = FontFamily(
-        font(
-            "JetBrains Mono",
-            "jetbrainsmono_regular",
-            FontWeight.Normal,
-            FontStyle.Normal
-        ),
-        font(
-            "JetBrains Mono",
-            "jetbrainsmono_italic",
-            FontWeight.Normal,
-            FontStyle.Italic
-        ),
-
-        font(
-            "JetBrains Mono",
-            "jetbrainsmono_bold",
-            FontWeight.Bold,
-            FontStyle.Normal
-        ),
-        font(
-            "JetBrains Mono",
-            "jetbrainsmono_bold_italic",
-            FontWeight.Bold,
-            FontStyle.Italic
-        ),
-
-        font(
-            "JetBrains Mono",
-            "jetbrainsmono_extrabold",
-            FontWeight.ExtraBold,
-            FontStyle.Normal
-        ),
-        font(
-            "JetBrains Mono",
-            "jetbrainsmono_extrabold_italic",
-            FontWeight.ExtraBold,
-            FontStyle.Italic
-        ),
-
-        font(
-            "JetBrains Mono",
-            "jetbrainsmono_medium",
-            FontWeight.Medium,
-            FontStyle.Normal
-        ),
-        font(
-            "JetBrains Mono",
-            "jetbrainsmono_medium_italic",
-            FontWeight.Medium,
-            FontStyle.Italic
-        )
+    fun jetBrainsMonoNL() = FontFamily(
+        font("JetBrains Mono NL", "JetBrainsMonoNL-Regular", FontWeight.Normal, FontStyle.Normal),
+        font("JetBrains Mono NL", "JetBrainsMonoNL-Bold", FontWeight.Bold, FontStyle.Normal),
+        font("JetBrains Mono NL", "JetBrainsMonoNL-Italic", FontWeight.Normal, FontStyle.Italic),
+        font("JetBrains Mono NL", "JetBrainsMonoNL-BoldItalic", FontWeight.Bold, FontStyle.Italic),
     )
 }

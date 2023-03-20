@@ -23,5 +23,6 @@ import androidx.compose.ui.unit.sp
 
 class Settings {
     var fontSize by mutableStateOf(17.sp)
-    val maxLineSymbols = 120
+    var lineSpace by mutableStateOf(1.6f)
+    // val maxLineSymbols = 120
 }

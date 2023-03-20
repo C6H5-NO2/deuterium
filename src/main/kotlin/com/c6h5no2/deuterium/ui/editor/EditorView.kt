@@ -123,7 +123,7 @@ private fun Lines(lines: Editor.Lines, editor: Editor, settings: Settings) = wit
             val compensation = 4
             val offset = ele.index * ele.size - ele.offset + compensation
             val sby = (editorScrollState.value - offset).toFloat()
-            if (sby.absoluteValue > 2 * compensation)
+            if (sby.absoluteValue > 1.5f * compensation)
                 listScrollState.scrollBy(sby)
         }
 
@@ -133,7 +133,7 @@ private fun Lines(lines: Editor.Lines, editor: Editor, settings: Settings) = wit
                 state = listScrollState
             ) {
                 items(lines.size) { index ->
-                    Box(Modifier.height(settings.fontSize.toDp() * 1.6f)) {
+                    Box(Modifier.height(settings.fontSize.toDp() * settings.lineSpace)) {
                         Line(Modifier.align(Alignment.CenterStart), maxNum, Editor.Line(index + 1), settings)
                     }
                 }
@@ -184,7 +184,7 @@ private fun Line(modifier: Modifier, maxNum: String, line: Editor.Line, settings
 private fun LineNumber(number: String, modifier: Modifier, settings: Settings) = Text(
     text = number,
     fontSize = settings.fontSize,
-    fontFamily = Fonts.jetbrainsMono(),
+    fontFamily = Fonts.jetBrainsMonoNL(),
     color = LocalContentColor.current.copy(alpha = 0.30f),
     modifier = modifier.padding(start = 12.dp)
 )
@@ -210,8 +210,8 @@ fun codeContent(lines: Editor.Lines, modifier: Modifier, settings: Settings) {
         textStyle = TextStyle(
             color = colors.textColor(enabled = true).value,
             fontSize = settings.fontSize,
-            fontFamily = Fonts.jetbrainsMono(),
-            lineHeight = settings.fontSize * 1.6f
+            fontFamily = Fonts.jetBrainsMonoNL(),
+            lineHeight = settings.fontSize * settings.lineSpace
         ),
         cursorBrush = SolidColor(colors.cursorColor(isError = false).value)
     )
