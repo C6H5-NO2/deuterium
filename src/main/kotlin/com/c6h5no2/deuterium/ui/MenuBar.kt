@@ -15,19 +15,24 @@ import kotlinx.coroutines.launch
 fun FrameWindowScope.menuBar(mainModel: MainModel) = MenuBar {
     val scope = rememberCoroutineScope()
 
-    fun newFile() = scope.launch { println("todo: new") }
-
     Menu("File", mnemonic = 'F') {
-        Item("New", shortcut = KeyShortcut(Key.N, ctrl = true)) { newFile() }
+        Item(
+            "New",
+            enabled = mainModel.runnerState == MainModel.RunnerState.STOPPED,
+            shortcut = KeyShortcut(Key.N, ctrl = true),
+            onClick = { scope.launch { mainModel.requestNewFile() } }
+        )
         Item(
             "Open",
+            enabled = mainModel.runnerState == MainModel.RunnerState.STOPPED,
             shortcut = KeyShortcut(Key.O, ctrl = true),
             onClick = { scope.launch { mainModel.requestOpenFile() } }
         )
         Separator()
         Item(
             "Save",
-            enabled = mainModel.editorState == MainModel.EditorState.MODIFIED,
+            enabled = mainModel.editorState == MainModel.EditorState.MODIFIED
+                    && mainModel.runnerState == MainModel.RunnerState.STOPPED,
             shortcut = KeyShortcut(Key.S, ctrl = true),
             onClick = { scope.launch { mainModel.requestSaveFile() } }
         )

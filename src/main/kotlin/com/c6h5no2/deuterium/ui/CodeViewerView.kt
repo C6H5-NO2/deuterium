@@ -106,7 +106,7 @@ fun CodeViewerView(codeViewer: CodeViewer, runner: RunnerModel) {
                     },
                     lowerContentTitleBar = {
                         Text(
-                            text = if (runner.isRunning) "> Running" else "Run",
+                            text = "Output" + (if (runner.isRunning) " > Running" else ""),
                             modifier = Modifier
                                 .padding(6.dp)
                                 .align(Alignment.TopStart)

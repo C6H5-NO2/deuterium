@@ -39,7 +39,7 @@ fun runnerView(runner: RunnerModel) {
         Column(Modifier.align(Alignment.Center)) {
             SelectionContainer {
                 Box {
-                    runPanelLines(runner)
+                    outputPanelLines(runner)
                 }
             }
         }
@@ -48,7 +48,7 @@ fun runnerView(runner: RunnerModel) {
 
 
 @Composable
-private fun runPanelLines(runner: RunnerModel) = with(LocalDensity.current) {
+private fun outputPanelLines(runner: RunnerModel) = with(LocalDensity.current) {
     Box(Modifier.fillMaxSize().horizontalScroll(rememberScrollState())) {
         if (runner.runnerOutputs.size != 0) {
             val scrollState = rememberLazyListState()
@@ -59,7 +59,7 @@ private fun runPanelLines(runner: RunnerModel) = with(LocalDensity.current) {
             ) {
                 items(runner.runnerOutputs.size) { index ->
                     Box(Modifier.height(17.sp.toDp() * 1.6f)) {
-                        runPanelLine(
+                        outputPanelLine(
                             Modifier.align(Alignment.CenterStart),
                             runner.runnerOutputs.getTyped(index),
                             runner.filename,
@@ -79,7 +79,7 @@ private fun runPanelLines(runner: RunnerModel) = with(LocalDensity.current) {
 
 
 @Composable
-private fun runPanelLine(
+private fun outputPanelLine(
     modifier: Modifier,
     segs: List<RunnerOutputSegment>,
     filename: String,

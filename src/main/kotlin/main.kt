@@ -72,14 +72,3 @@ fun FrameWindowScope.dialogWindows(model: DialogModel) {
             onResult = { model.askToSaveResultDeferred.onResult(it) }
         )
 }
-
-
-private fun MainModel.getTitle(): String {
-    val appName = "Deuterium"
-    if (editorState == MainModel.EditorState.EMPTY)
-        return appName
-    val fileName = if (currentFile == null) "untitled" else currentFile!!.name
-    val modified = if (editorState == MainModel.EditorState.MODIFIED) "* " else ""
-    val running = if (runnerState == MainModel.RunnerState.RUNNING) "> " else ""
-    return "$modified$running$fileName - $appName"
-}

@@ -40,6 +40,7 @@ class Editor(
     var close: (() -> Unit)? = null
     lateinit var selection: SingleSelection
 
+    @Deprecated("", replaceWith = ReplaceWith(""))
     val fileName: String
         get() = file.name
 

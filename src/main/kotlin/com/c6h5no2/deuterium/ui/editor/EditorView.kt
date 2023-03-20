@@ -220,7 +220,8 @@ fun codeContent(lines: Editor.Lines, modifier: Modifier, settings: Settings) {
 private fun codeString(str: String) = buildAnnotatedString {
     withStyle(AppTheme.code.simple) {
         append(str)
-        addStyle(AppTheme.code.comment, str, Regex("//.*"))
+        addStyle(AppTheme.code.comment, str, Regex("//.*\$"))
+        addStyle(AppTheme.code.comment, str, Regex("/\\*(.|[\\r\\n])*?\\*/"))
         addStyle(AppTheme.code.value, str, Regex("[0-9]+"))
         // https://kotlinlang.org/docs/keyword-reference.html#hard-keywords
         val keywords = listOf(
