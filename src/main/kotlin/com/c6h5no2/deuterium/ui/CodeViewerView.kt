@@ -106,7 +106,17 @@ fun CodeViewerView(codeViewer: CodeViewer, runner: RunnerModel) {
                     },
                     lowerContentTitleBar = {
                         Text(
-                            text = "Output" + (if (runner.isRunning) " > Running" else ""),
+                            text =
+                            "Output" +
+                                if (runner.isRunning) {
+                                    " > Running" +
+                                        if (runner.runConfig.nRuns > 1) {
+                                            " ${runner.progress}" +
+                                                (if (runner.updateFlip) " " else "")  // force update ui
+                                        } else
+                                            ""
+                                } else
+                                    "",
                             modifier = Modifier
                                 .padding(6.dp)
                                 .align(Alignment.TopStart)

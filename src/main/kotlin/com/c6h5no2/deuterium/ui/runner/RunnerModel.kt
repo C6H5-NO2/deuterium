@@ -10,6 +10,8 @@ import java.io.File
 import java.io.IOException
 import java.io.InputStream
 import kotlin.concurrent.thread
+import kotlin.time.ExperimentalTime
+import kotlin.time.measureTime
 
 
 private val logger = mu.KotlinLogging.logger {}
@@ -35,9 +37,7 @@ class RunnerModel {
         private set
 
 
-    suspend fun runOnce(file: File) {
-        if (isRunning)
-            return
+    private fun prepareRun(file: File): ProcessBuilder {
         isRunning = true
         filename = file.name
         runnerOutputs = RunnerOutputs()
@@ -46,23 +46,28 @@ class RunnerModel {
         val script = file.absolutePath
         logger.info { "Run script $script" }
 
-        val workingDirectory = file.parentFile
         val kotlinc = runConfig.kotlincPath.ifEmpty { "kotlinc" }
         val paramsStr = runConfig.cmdArgs
         val params = paramsStr.splitToSequence(' ', '\t', '\n', '\r', '\u000c').toList().toTypedArray()
 
         // val command = listOf("\"$kotlinc\"", "-version")
         val command = listOf("\"$kotlinc\"", "-script", "\"$script\"", "--", *params)
-        logger.info { "Execute command ${command.joinToString(separator = " ")}" }
-        val pb = ProcessBuilder(command)
+
+        val workingDirectory = file.parentFile
+
+        return ProcessBuilder(command)
             .directory(workingDirectory)
             .redirectInput(ProcessBuilder.Redirect.PIPE)
             .redirectOutput(ProcessBuilder.Redirect.PIPE)
             .redirectError(ProcessBuilder.Redirect.PIPE)
+    }
 
+
+    private suspend fun performRun(builder: ProcessBuilder) {
+        logger.info { "Execute command ${builder.command().joinToString(separator = " ")}" }
         withContext(Dispatchers.IO) {
             try {
-                val process = pb.start()
+                val process = builder.start()
                 process.outputStream.close()
 
                 val ostream = thread {
@@ -71,6 +76,11 @@ class RunnerModel {
 
                 val estream = thread {
                     readFromStream(process.errorStream, RunnerOutputType.ERROR_STREAM)
+                }
+
+                while (process.isAlive) {
+                    updateFlip = !updateFlip
+                    Thread.sleep(1000)
                 }
 
                 val exitCode = process.waitFor()
@@ -85,9 +95,40 @@ class RunnerModel {
                 runnerOutputs.appendSegment("\n\n$msg\n\n", RunnerOutputType.PROCESS_FATAL)
             } finally {
                 updateFlip = !updateFlip
-                isRunning = false
             }
         }
+    }
+
+
+    var progress = RunnerProgress(1)
+        private set
+
+
+    @OptIn(ExperimentalTime::class)
+    suspend fun runScript(file: File) {
+        if (isRunning)
+            return
+
+        check(runConfig.nRuns > 0)
+        progress = RunnerProgress(runConfig.nRuns)
+
+        val processBuilder = prepareRun(file)
+
+        measureTime {
+            performRun(processBuilder)
+        }.also {
+            progress.finishRun(1, it)
+        }
+
+        for (runIdx in 2..runConfig.nRuns) {
+            measureTime {
+                performRun(processBuilder)
+            }.also {
+                progress.finishRun(runIdx, it)
+            }
+        }
+
+        isRunning = false
     }
 
 

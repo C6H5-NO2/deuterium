@@ -181,7 +181,7 @@ class MainModel {
                 return
         // else: run either the saved script or the original one as user's intent  
         val file = currentFile ?: return
-        runner.runOnce(file)
+        runner.runScript(file)
     }
 
     enum class RunnerState {

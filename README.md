@@ -20,7 +20,7 @@ Deuterium is an editor for Kotlin script. Users can write a script, execute it, 
 
 - [x] Highlight [hard keywords](https://kotlinlang.org/docs/keyword-reference.html#hard-keywords), numbers, and line comments.
 - [x] Link location descriptions to cursor positions in code.
-- [ ] Allow users to run script multiple times. Show an estimated remaining time.
+- [x] Allow users to run script multiple times. Show an estimated remaining time.
 
 
 
