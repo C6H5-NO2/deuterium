@@ -50,8 +50,10 @@ class RunnerModel {
         val paramsStr = runConfig.cmdArgs
         val params = paramsStr.splitToSequence(' ', '\t', '\n', '\r', '\u000c').toList().toTypedArray()
 
-        // val command = listOf("\"$kotlinc\"", "-version")
-        val command = listOf("\"$kotlinc\"", "-script", "\"$script\"", "--", *params)
+        // val isWindows = System.getProperty("os.name").startsWith("win", ignoreCase = true)
+
+        // val command = listOf(kotlinc, "-version")
+        val command = listOf(kotlinc, "-script", script, "--", *params)
 
         val workingDirectory = file.parentFile
 
